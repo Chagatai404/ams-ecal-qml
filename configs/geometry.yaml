@@ -1,0 +1,26 @@
+schema_version: 1
+
+units:
+  length: mm
+  angle: rad
+  energy: MeV
+
+active_volume:
+  width_x: 648.0
+  width_y: 648.0
+  depth_z: 166.5
+
+readout:
+  number_of_superlayers: 9
+  number_of_layers: 18
+  cells_per_layer: 72
+  cell_pitch: 9.0
+
+material_depth:
+  radiation_lengths: 17.0
+  interaction_lengths: 0.6
+
+coordinate_system:
+  origin: front_face_center
+  positive_z_direction: into_ecal
+  theta_reference_axis: positive_z
