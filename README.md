@@ -70,7 +70,7 @@ flowchart TD
 
 ### 1. Detector and event foundation
 
-The first stage defines the scientific coordinate system and the canonical objects used throughout the repository.
+The project is segmented into small building blocks. The first stage defines the scientific coordinate system and the canonical objects used throughout the repository.
 
 - **Block 0 — ECAL geometry:** load detector constants from configuration, derive layer and cell coordinates, and enforce geometry invariants.
 - **Block 1 — Tracker state and projection:** represent an incident track and project a straight-line trajectory through ECAL layer depths.
