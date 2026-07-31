@@ -2,7 +2,7 @@
 
 A physics-informed research project for simulating the AMS-02 Electromagnetic Calorimeter (ECAL) and benchmarking quantum convolutional neural networks against classical models for electromagnetic-shower versus proton-background classification.
 
-> **Research status:** early development. Block 0—repository foundation and ECAL geometry—is in progress. This repository does not yet contain validated simulation results or a trained classifier.
+> **Research status:** early development. Block 0—repository foundation and simplified ECAL geometry—is complete. Block 1 has not started.
 
 ## Research objective
 
@@ -215,17 +215,17 @@ The repository grows one block at a time. Future directories and placeholder mod
 
 ## Current repository state
 
-Block 0 is active.
+Block 0 is complete.
 
 | Item | Status |
 |---|---|
 | CPython 3.14 GIL-enabled interpreter pin | Complete |
 | Reproducible `uv.lock` environment | Complete |
-| Initial geometry configuration | Present; requires scientific review |
-| ECAL geometry implementation | Draft; not yet accepted or tested |
-| Calorimetry and geometry notebook | Placeholder; not yet a valid notebook |
-| Geometry invariant tests | Not started |
-| Shower simulation and ML models | Not started |
+| Geometry configuration | Complete and schema-validated |
+| Simplified ECAL geometry implementation | Complete and tested |
+| Calorimetry and geometry notebook | Complete and executable |
+| Geometry invariant tests | Complete |
+| Tracker projection, shower simulation, and ML models | Not started |
 
 No file marked as a draft should be interpreted as a validated scientific implementation.
 

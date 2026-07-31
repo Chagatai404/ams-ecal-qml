@@ -1,8 +1,21 @@
+from collections.abc import Mapping
 from dataclasses import dataclass
 from math import isclose, isfinite
 from pathlib import Path
 
 import yaml
+
+
+EXPECTED_SCHEMA_VERSION = 1
+EXPECTED_UNITS = {
+    "length": "mm",
+    "angle": "rad",
+    "energy": "MeV",
+}
+
+
+class GeometryConfigError(ValueError):
+    """Raised when a geometry configuration is malformed or unsupported."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -71,7 +84,7 @@ class ECALGeometry:
             raise ValueError(
                 "width_y_mm must equal cells_per_layer * cell_pitch_mm"
             )
-        
+
         expected_conventions = {
             "origin": (self.origin, "front_face_center"),
             "positive_z_direction": (
@@ -92,7 +105,7 @@ class ECALGeometry:
                 raise ValueError(
                     f"{name} must be {expected!r}, got {actual!r}"
                 )
-            
+
     @property
     def total_cells(self) -> int:
         """Return the total number of readout cells."""
@@ -139,3 +152,137 @@ class ECALGeometry:
         """Return the active-volume bounds along z."""
 
         return (0.0, self.depth_z_mm)
+
+
+def _require_mapping(value: object, context: str) -> Mapping[object, object]:
+    if not isinstance(value, Mapping):
+        raise GeometryConfigError(f"{context} must be a YAML mapping")
+
+    return value
+
+
+def _require_exact_keys(
+    mapping: Mapping[object, object],
+    expected_keys: set[str],
+    context: str,
+) -> None:
+    actual_keys = set(mapping)
+    missing_keys = expected_keys - actual_keys
+    unexpected_keys = actual_keys - expected_keys
+
+    problems: list[str] = []
+
+    if missing_keys:
+        problems.append(f"missing keys: {sorted(missing_keys)}")
+
+    if unexpected_keys:
+        problems.append(
+            f"unexpected keys: {sorted(map(str, unexpected_keys))}"
+        )
+
+    if problems:
+        raise GeometryConfigError(f"{context} has " + "; ".join(problems))
+
+
+def load_geometry(config_path: str | Path) -> ECALGeometry:
+    """Load and validate an ECAL geometry from a versioned YAML file."""
+
+    path = Path(config_path)
+
+    if not path.is_file():
+        raise FileNotFoundError(f"Geometry configuration not found: {path}")
+
+    try:
+        raw_config = yaml.safe_load(path.read_text(encoding="utf-8"))
+    except yaml.YAMLError as exc:
+        raise GeometryConfigError(
+            f"Could not parse geometry configuration {path}: {exc}"
+        ) from exc
+
+    config = _require_mapping(raw_config, "geometry configuration root")
+    _require_exact_keys(
+        config,
+        {
+            "schema_version",
+            "units",
+            "active_volume",
+            "readout",
+            "material_depth",
+            "coordinate_system",
+        },
+        "geometry configuration root",
+    )
+
+    schema_version = config["schema_version"]
+
+    if isinstance(schema_version, bool) or not isinstance(schema_version, int):
+        raise GeometryConfigError("schema_version must be an integer")
+
+    if schema_version != EXPECTED_SCHEMA_VERSION:
+        raise GeometryConfigError(
+            "Unsupported geometry schema_version "
+            f"{schema_version}; expected {EXPECTED_SCHEMA_VERSION}"
+        )
+
+    units = _require_mapping(config["units"], "units")
+    _require_exact_keys(units, set(EXPECTED_UNITS), "units")
+
+    if dict(units) != EXPECTED_UNITS:
+        raise GeometryConfigError(
+            f"units must equal {EXPECTED_UNITS}, got {dict(units)}"
+        )
+
+    active_volume = _require_mapping(config["active_volume"], "active_volume")
+    readout = _require_mapping(config["readout"], "readout")
+    material_depth = _require_mapping(
+        config["material_depth"], "material_depth"
+    )
+    coordinate_system = _require_mapping(
+        config["coordinate_system"], "coordinate_system"
+    )
+
+    _require_exact_keys(
+        active_volume,
+        {"width_x", "width_y", "depth_z"},
+        "active_volume",
+    )
+    _require_exact_keys(
+        readout,
+        {
+            "number_of_superlayers",
+            "number_of_layers",
+            "cells_per_layer",
+            "cell_pitch",
+        },
+        "readout",
+    )
+    _require_exact_keys(
+        material_depth,
+        {"radiation_lengths", "interaction_lengths"},
+        "material_depth",
+    )
+    _require_exact_keys(
+        coordinate_system,
+        {"origin", "positive_z_direction", "theta_reference_axis"},
+        "coordinate_system",
+    )
+
+    try:
+        return ECALGeometry(
+            width_x_mm=active_volume["width_x"],
+            width_y_mm=active_volume["width_y"],
+            depth_z_mm=active_volume["depth_z"],
+            number_of_superlayers=readout["number_of_superlayers"],
+            number_of_layers=readout["number_of_layers"],
+            cells_per_layer=readout["cells_per_layer"],
+            cell_pitch_mm=readout["cell_pitch"],
+            total_depth_x0=material_depth["radiation_lengths"],
+            total_depth_lambda_i=material_depth["interaction_lengths"],
+            origin=coordinate_system["origin"],
+            positive_z_direction=coordinate_system["positive_z_direction"],
+            theta_reference_axis=coordinate_system["theta_reference_axis"],
+        )
+    except (TypeError, ValueError) as exc:
+        raise GeometryConfigError(
+            f"Invalid geometry values in {path}: {exc}"
+        ) from exc

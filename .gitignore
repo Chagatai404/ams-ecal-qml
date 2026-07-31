@@ -22,6 +22,10 @@ build/
 dist/
 *.egg-info/
 
+# Local pytest temporary workspace
+.pytest_tmp/
+.pytest_cache/
+
 # Jupyter temporary files
 .ipynb_checkpoints/
 
