@@ -6,6 +6,9 @@ requires-python = "==3.14.*"
 name = "ams-ecal-qml"
 version = "0.1.0"
 source = { virtual = "." }
+dependencies = [
+    { name = "pyyaml" },
+]
 
 [package.dev-dependencies]
 dev = [
@@ -14,6 +17,7 @@ dev = [
 ]
 
 [package.metadata]
+requires-dist = [{ name = "pyyaml", specifier = ">=6.0.3,<7" }]
 
 [package.metadata.requires-dev]
 dev = [

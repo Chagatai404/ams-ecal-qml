@@ -1,56 +1,73 @@
 from dataclasses import dataclass
+from math import isclose, isfinite
 from pathlib import Path
 
-import numpy as np
 import yaml
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, slots=True)
 class ECALGeometry:
+    """Validated simplified geometry of the AMS-02 ECAL active volume."""
+
     width_x_mm: float
     width_y_mm: float
     depth_z_mm: float
+
+    number_of_superlayers: int
     number_of_layers: int
     cells_per_layer: int
     cell_pitch_mm: float
+
     total_depth_x0: float
+    total_depth_lambda_i: float
 
-    @classmethod
-    def from_yaml(cls, path: str | Path) -> "ECALGeometry":
-        with Path(path).open("r", encoding="utf-8") as file:
-            config = yaml.safe_load(file)
+    origin: str
+    positive_z_direction: str
+    theta_reference_axis: str
 
-        return cls(
-            width_x_mm=config["active_volume"]["width_x"],
-            width_y_mm=config["active_volume"]["width_y"],
-            depth_z_mm=config["active_volume"]["depth_z"],
-            number_of_layers=config["readout"]["number_of_layers"],
-            cells_per_layer=config["readout"]["cells_per_layer"],
-            cell_pitch_mm=config["readout"]["cell_pitch"],
-            total_depth_x0=config["material_depth"]["radiation_lengths"],
-        )
+    def __post_init__(self) -> None:
+        positive_lengths = {
+            "width_x_mm": self.width_x_mm,
+            "width_y_mm": self.width_y_mm,
+            "depth_z_mm": self.depth_z_mm,
+            "cell_pitch_mm": self.cell_pitch_mm,
+            "total_depth_x0": self.total_depth_x0,
+            "total_depth_lambda_i": self.total_depth_lambda_i,
+        }
 
-    @property
-    def layer_thickness_mm(self) -> float:
-        return self.depth_z_mm / self.number_of_layers
+        for name, value in positive_lengths.items():
+            if isinstance(value, bool) or not isinstance(value, int | float):
+                raise TypeError(f"{name} must be a real number")
 
-    @property
-    def layer_centers_z_mm(self) -> np.ndarray:
-        thickness = self.layer_thickness_mm
-        return np.arange(self.number_of_layers) * thickness + thickness / 2
+            if not isfinite(value) or value <= 0:
+                raise ValueError(f"{name} must be finite and positive")
 
-    @property
-    def x_min_mm(self) -> float:
-        return -self.width_x_mm / 2
+        positive_counts = {
+            "number_of_superlayers": self.number_of_superlayers,
+            "number_of_layers": self.number_of_layers,
+            "cells_per_layer": self.cells_per_layer,
+        }
 
-    @property
-    def x_max_mm(self) -> float:
-        return self.width_x_mm / 2
+        for name, value in positive_counts.items():
+            if isinstance(value, bool) or not isinstance(value, int):
+                raise TypeError(f"{name} must be an integer")
 
-    @property
-    def y_min_mm(self) -> float:
-        return -self.width_y_mm / 2
+            if value <= 0:
+                raise ValueError(f"{name} must be positive")
 
-    @property
-    def y_max_mm(self) -> float:
-        return self.width_y_mm / 2
+        if self.number_of_layers != 2 * self.number_of_superlayers:
+            raise ValueError(
+                "number_of_layers must equal twice number_of_superlayers"
+            )
+
+        expected_width_mm = self.cells_per_layer * self.cell_pitch_mm
+
+        if not isclose(self.width_x_mm, expected_width_mm):
+            raise ValueError(
+                "width_x_mm must equal cells_per_layer * cell_pitch_mm"
+            )
+
+        if not isclose(self.width_y_mm, expected_width_mm):
+            raise ValueError(
+                "width_y_mm must equal cells_per_layer * cell_pitch_mm"
+            )
