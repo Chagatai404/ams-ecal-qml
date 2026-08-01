@@ -5,7 +5,6 @@ from pathlib import Path
 
 import yaml
 
-
 EXPECTED_SCHEMA_VERSION = 1
 EXPECTED_UNITS = {
     "length": "mm",

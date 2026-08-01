@@ -5,6 +5,7 @@ import pytest
 
 from ams_ecal.tracking import TrackState, project_track_to_z
 
+
 def valid_track_values() -> dict[str, float]:
     return {
         "x0_mm": 10.0,
