@@ -2,7 +2,7 @@
 
 A physics-informed research project for simulating the AMS-02 Electromagnetic Calorimeter (ECAL) and benchmarking quantum convolutional neural networks against classical models for electromagnetic-shower versus proton-background classification.
 
-> **Research status:** early development. Block 0—repository foundation and simplified ECAL geometry—is complete. Block 1 has not started.
+> **Research status:** early development. Blocks 0 and 1 are complete: the repository now includes a validated simplified ECAL geometry, an immutable reconstructed-track model, and continuous straight-line projection through all 18 ECAL layer centers. Block 2—alternating readout orientation and cell mapping—is next.
 
 ## Research objective
 
@@ -215,7 +215,7 @@ The repository grows one block at a time. Future directories and placeholder mod
 
 ## Current repository state
 
-Block 0 is complete.
+Blocks 0 and 1 are complete. The repository currently supports continuous detector geometry and straight-line tracker projection. It does not yet assign readout views or discrete ECAL cell indices; those operations begin in Block 2.
 
 | Item | Status |
 |---|---|
@@ -225,7 +225,15 @@ Block 0 is complete.
 | Simplified ECAL geometry implementation | Complete and tested |
 | Calorimetry and geometry notebook | Complete and executable |
 | Geometry invariant tests | Complete |
-| Tracker projection, shower simulation, and ML models | Not started |
+| Immutable `TrackState` model | Complete and tested |
+| Cartesian direction vector and transverse slopes | Complete and tested |
+| Pure straight-line projection to arbitrary finite $z$ | Complete and tested |
+| Projection through all 18 ECAL layer centers | Complete and notebook-validated |
+| Tracker-state and projection notebook | Complete and executable |
+| Alternating readout orientation and cell mapping | Next: Block 2 |
+| Shower simulation and detector response | Planned: Blocks 4–8 |
+| Geant4 reference simulation | Planned: Blocks 9–11 and later extensions |
+| Classical and quantum ML models | Planned after validated simulation and preprocessing |
 
 No file marked as a draft should be interpreted as a validated scientific implementation.
 
@@ -238,11 +246,16 @@ Only currently created paths are shown:
 ├── configs/
 │   └── geometry.yaml
 ├── notebooks/
-│   └── 00_ecal_calorimetry_and_geometry.ipynb
+│   ├── 00_ecal_calorimetry_and_geometry.ipynb
+│   └── 01_tracker_state_and_projection.ipynb
 ├── src/
 │   └── ams_ecal/
 │       ├── __init__.py
-│       └── geometry.py
+│       ├── geometry.py
+│       └── tracking.py
+├── tests/
+│   ├── test_geometry.py
+│   └── test_tracking.py
 ├── .gitignore
 ├── .python-version
 ├── pyproject.toml
@@ -272,7 +285,14 @@ To open the teaching notebooks:
 uv run jupyter lab
 ```
 
-The simulator is not yet runnable end to end. Runtime scientific dependencies will be added only when the active block demonstrates a real need for them.
+Run the repository checks with:
+
+```bash
+uv run ruff check .
+uv run pytest -q
+```
+
+Both notebooks should also run from beginning to end after restarting their kernels. The simulator is not yet runnable end to end. Runtime scientific dependencies will be added only when the active block demonstrates a real need for them.
 
 ## References
 
