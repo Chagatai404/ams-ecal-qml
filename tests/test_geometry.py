@@ -9,7 +9,6 @@ from ams_ecal.geometry import (
     load_geometry,
 )
 
-
 CONFIG_PATH = Path(__file__).parents[1] / "configs" / "geometry.yaml"
 
 
