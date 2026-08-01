@@ -63,3 +63,33 @@ class TrackState:
             direction_x / direction_z,
             direction_y / direction_z,
         )
+
+def project_track_to_z(
+    track: TrackState,
+    target_z_mm: float,
+) -> tuple[float, float, float]:
+    """Project a reconstructed track to a plane at a specified z-coordinate."""
+
+    if isinstance(target_z_mm, bool) or not isinstance(
+        target_z_mm,
+        int | float,
+    ):
+        raise TypeError("target_z_mm must be a real number")
+
+    if not isfinite(target_z_mm):
+        raise ValueError("target_z_mm must be finite")
+
+    target_z_mm = float(target_z_mm)
+    delta_z_mm = target_z_mm - track.z0_mm
+    slope_x, slope_y = track.slopes_wrt_z
+
+    projected_x_mm = track.x0_mm + delta_z_mm * slope_x
+    projected_y_mm = track.y0_mm + delta_z_mm * slope_y
+
+    if not all(
+        isfinite(value)
+        for value in (projected_x_mm, projected_y_mm)
+    ):
+        raise ValueError("projected coordinates must be finite")
+
+    return projected_x_mm, projected_y_mm, target_z_mm

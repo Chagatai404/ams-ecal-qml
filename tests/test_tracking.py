@@ -3,8 +3,7 @@ from math import pi, radians, sqrt, tau
 
 import pytest
 
-from ams_ecal.tracking import TrackState
-
+from ams_ecal.tracking import TrackState, project_track_to_z
 
 def valid_track_values() -> dict[str, float]:
     return {
@@ -98,3 +97,99 @@ def test_rejects_invalid_track_values(
 
     with pytest.raises(error_type, match=message):
         TrackState(**values)
+
+def test_projects_inclined_track_to_target_z() -> None:
+    track = TrackState(**valid_track_values())
+
+    projected_point = project_track_to_z(track, target_z_mm=4.625)
+
+    assert projected_point == pytest.approx(
+        (
+            10.7062543566,
+            -19.5922438571,
+            4.625,
+        )
+    )
+
+
+def test_projects_vertical_track_without_transverse_motion() -> None:
+    track = TrackState(
+        x0_mm=10.0,
+        y0_mm=-20.0,
+        z0_mm=0.0,
+        theta_rad=0.0,
+        phi_rad=radians(120.0),
+    )
+
+    projected_point = project_track_to_z(
+        track,
+        target_z_mm=161.875,
+    )
+
+    assert projected_point == pytest.approx(
+        (10.0, -20.0, 161.875)
+    )
+
+
+def test_projects_from_an_upstream_reference_plane() -> None:
+    track = TrackState(
+        x0_mm=10.0,
+        y0_mm=-20.0,
+        z0_mm=-100.0,
+        theta_rad=radians(10.0),
+        phi_rad=radians(30.0),
+    )
+
+    projected_point = project_track_to_z(
+        track,
+        target_z_mm=0.0,
+    )
+
+    assert projected_point == pytest.approx(
+        (
+            25.2703644666,
+            -11.1836509646,
+            0.0,
+        )
+    )
+
+
+def test_allows_backward_straight_line_extrapolation() -> None:
+    track = TrackState(**valid_track_values())
+
+    projected_point = project_track_to_z(
+        track,
+        target_z_mm=-10.0,
+    )
+
+    assert projected_point == pytest.approx(
+        (
+            8.4729635533,
+            -20.8816349035,
+            -10.0,
+        )
+    )
+
+
+def test_rejects_boolean_target_z() -> None:
+    track = TrackState(**valid_track_values())
+
+    with pytest.raises(TypeError, match="must be a real number"):
+        project_track_to_z(track, target_z_mm=True)
+
+
+@pytest.mark.parametrize(
+    "target_z_mm",
+    [
+        float("nan"),
+        float("inf"),
+        float("-inf"),
+    ],
+)
+def test_rejects_nonfinite_target_z(
+    target_z_mm: float,
+) -> None:
+    track = TrackState(**valid_track_values())
+
+    with pytest.raises(ValueError, match="must be finite"):
+        project_track_to_z(track, target_z_mm)
