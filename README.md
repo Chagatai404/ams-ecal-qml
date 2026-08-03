@@ -6,7 +6,7 @@ A physics-informed research program for simulating the AMS-02 Electromagnetic Ca
 
 ## Project scope
 
-This repository supports a **long-term research program**, not a commitment to implement every possible model before producing a result. The immediate objective is a narrower and feasible first study. Later architecture-development, noise, hardware, and domain-transfer stages are conditional on evidence from the earlier experiments.
+This repository supports a **long-term research direction**, not a commitment to implement every possible model before producing a result. The immediate objective is a narrower and feasible first study. Later architecture-development, noise, hardware, and domain-transfer stages are conditional on evidence from the earlier experiments.
 
 The project does **not** assume that a quantum model will outperform a classical model. A rigorous negative result—showing where quantum models fail to improve upon strong controls—would still be scientifically useful.
 
@@ -34,7 +34,7 @@ Any claimed advantage must survive strong classical controls, repeated runs, unc
 
 ## Physics scope
 
-The AMS-02 ECAL is a three-dimensional lead–scintillating-fiber sampling calorimeter. Electrons and positrons lose energy mainly through bremsstrahlung and pair production, producing relatively compact electromagnetic showers. Protons interact hadronically and tend to produce more irregular, penetrating, late-starting, or only partially contained deposits.
+The AMS-02 ECAL is a three-dimensional lead–scintillating-fiber sampling calorimeter. Electrons and positrons lose energy mainly through *bremsstrahlung* and pair production, producing relatively compact electromagnetic showers. Protons interact hadronically and tend to produce more irregular, penetrating, late-starting, or only partially contained deposits.
 
 The ECAL alone cannot determine the charge sign of an electromagnetic particle. Consequently, the detector-level classification target is
 
