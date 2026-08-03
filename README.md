@@ -1,24 +1,42 @@
 # AMS-02 ECAL QML
 
-A physics-informed research project for simulating the AMS-02 Electromagnetic Calorimeter (ECAL) and benchmarking quantum convolutional neural networks against classical models for electromagnetic-shower versus proton-background classification.
+A physics-informed research program for simulating the AMS-02 Electromagnetic Calorimeter (ECAL) and conducting resource-matched comparisons of classical, quantum-inspired, and quantum models for electromagnetic-shower versus proton-background classification.
 
-> **Research status:** early development. Blocks 0 and 1 are complete: the repository now includes a validated simplified ECAL geometry, an immutable reconstructed-track model, and continuous straight-line projection through all 18 ECAL layer centers. Block 2—alternating readout orientation and cell mapping—is next.
+> **Research status:** early development. Blocks 0 and 1 are complete: the repository includes a validated simplified ECAL geometry, an immutable reconstructed-track model, and continuous straight-line projection through all 18 ECAL layer centers. Block 2—alternating readout orientation and cell mapping—is next.
 
-## Research objective
+## Project scope
 
-The long-term objective is to investigate whether a hybrid quantum convolutional neural network (Q-CNN) can learn useful shower-shape structure from a compact, physics-informed representation of AMS-02 ECAL events.
+This repository supports a **long-term research ambition**, not a commitment to implement every possible model before producing a result. The immediate objective is a narrower and feasible first study. Later architecture-development, noise, hardware, and domain-transfer stages are conditional on evidence from the earlier experiments.
 
-The central research question is:
+The project does **not** assume that a quantum model will outperform a classical model. A rigorous negative result—showing where quantum models fail to improve upon strong controls—would still be scientifically useful.
 
-> Under controlled and reproducible simulation conditions, how does a Q-CNN compare with appropriately matched classical baselines when separating electron/positron electromagnetic showers from cosmic-ray proton backgrounds?
+### Long-term research direction
 
-The project does **not** assume that a quantum model will outperform a classical one. The intended contribution is a careful comparison that reports predictive performance, resource requirements, stability, and limitations without claiming quantum advantage unless the evidence supports it.
+> Under matched data, optimization, and resource budgets, which classical, quantum-inspired, and quantum architectures are most suitable for AMS-02 ECAL proton rejection, and are there physically meaningful regimes in which quantum models provide superior predictive performance, sample efficiency, parameter efficiency, robustness, or memory-related advantages?
+
+### First-study research question
+
+> On a validated, track-centered representation of AMS-02 ECAL events, can a small physics-informed quantum model match or improve upon appropriately controlled compact classical models in proton rejection, sample efficiency, or parameter efficiency?
+
+The first study will establish strong baselines, identify promising or unpromising quantum inductive biases, and determine whether a detector-specific architecture is justified. A new architecture is therefore a **conditional research outcome**, not a predetermined deliverable.
+
+## What counts as an advantage
+
+The project distinguishes several claims that must not be combined into a vague statement of “quantum advantage”:
+
+1. **Predictive advantage:** better classification at a relevant detector operating point.
+2. **Sample-efficiency advantage:** comparable performance using fewer labeled events.
+3. **Parameter-efficiency advantage:** comparable performance using fewer trainable parameters.
+4. **Robustness advantage:** reduced degradation under noise, detector perturbations, or simulation-domain shift.
+5. **Computational or space advantage:** reduced memory or asymptotically favorable execution under explicitly stated assumptions.
+
+Any claimed advantage must survive strong classical controls, repeated runs, uncertainty analysis, and comparable model-selection budgets.
 
 ## Physics scope
 
-The AMS-02 ECAL is a three-dimensional lead–scintillating-fiber sampling calorimeter. Electrons and positrons lose energy mainly through bremsstrahlung and pair production, producing relatively compact electromagnetic showers. Protons interact hadronically and tend to produce more irregular, penetrating, or only partially contained energy deposits.
+The AMS-02 ECAL is a three-dimensional lead–scintillating-fiber sampling calorimeter. Electrons and positrons lose energy mainly through *bremsstrahlung* and pair production, producing relatively compact electromagnetic showers. Protons interact hadronically and tend to produce more irregular, penetrating, late-starting, or only partially contained deposits.
 
-The ECAL alone cannot determine the sign of an electromagnetic particle. Consequently, the detector-level classification target is
+The ECAL alone cannot determine the charge sign of an electromagnetic particle. Consequently, the detector-level classification target is
 
 $$
 e^\pm \text{ versus } p,
@@ -26,7 +44,7 @@ $$
 
 not $e^+$ versus $e^-$. Charge-sign information belongs to the tracker.
 
-The initial geometry model is based on the following high-level detector properties:
+The initial geometry model uses the following high-level detector properties:
 
 | Quantity | Value |
 |---|---:|
@@ -47,134 +65,263 @@ $$
 
 rather than a dense $18 \times 72 \times 72$ voxel volume. Each longitudinal layer measures one transverse coordinate according to its readout orientation.
 
-A tracker-projected crop will later select 21 cells around the predicted shower axis in every layer:
+A tracker-projected crop will later select a local strip around the predicted shower axis in every layer. The initial candidate is
 
 $$
 \mathbf{E}_{\mathrm{crop}} \in \mathbb{R}^{18 \times 21}.
 $$
 
-This is a layer-wise projected strip, not a conventional square image crop. The proposed width will be tested through containment studies and crop-size ablations rather than treated as automatically optimal.
+This is a layer-wise projected strip, not a conventional square image crop. The width of 21 cells is a hypothesis to be tested through containment and crop-size ablations, not an assumed optimum.
 
-## End-to-end methodology
+## Research methodology
 
 ```mermaid
 flowchart TD
     A["Detector geometry and coordinates"] --> B["Tracker projection and cell mapping"]
-    B --> C["FastMC shower simulation"]
-    C --> D["Detector response and digitization"]
-    D --> E["Geant4 reference simulation"]
-    E --> F["Physics-informed preprocessing"]
-    F --> G["Classical and Q-CNN training"]
-    G --> H["Evaluation, ablations, and reporting"]
+    B --> C["Canonical event model"]
+    C --> D["FastMC and detector response"]
+    D --> E["Simulation validation"]
+    E --> F["Focused representation and baseline study"]
+    F --> G{"Evidence of a promising inductive bias?"}
+    G -- "No" --> H["Report controlled negative result"]
+    G -- "Yes" --> I["Mechanism and ablation study"]
+    I --> J{"Architecture justified?"}
+    J -- "No" --> H
+    J -- "Yes" --> K["Detector-specific architecture"]
+    K --> L["Robustness, domain transfer, and optional hardware"]
 ```
 
-### 1. Detector and event foundation
+The repository develops along three synchronized tracks:
 
-The project is segmented into small building blocks. The first stage defines the scientific coordinate system and the canonical objects used throughout the repository.
+- **Detector and dataset validity:** determine whether the simulated benchmark is scientifically credible.
+- **Algorithmic benchmarking:** compare selected model families under controlled conditions.
+- **Architecture discovery:** design a new model only after experiments identify reproducible beneficial components.
+
+## Staged roadmap
+
+### Stage I — Detector and event foundation
+
+The first stage defines the scientific coordinate system and canonical objects used throughout the repository.
 
 - **Block 0 — ECAL geometry:** load detector constants from configuration, derive layer and cell coordinates, and enforce geometry invariants.
 - **Block 1 — Tracker state and projection:** represent an incident track and project a straight-line trajectory through ECAL layer depths.
 - **Block 2 — Readout orientation and cell mapping:** encode alternating ECAL views and convert projected coordinates into valid cell indices.
 - **Block 3 — Canonical event model:** define one stable event representation shared by simulation, preprocessing, storage, and machine-learning code.
 
-### 2. Physics-informed FastMC
+**Stage exit condition:** all simulation backends and preprocessing code must target the same validated event schema.
 
-The Fast Monte Carlo will provide a transparent and computationally inexpensive environment for learning the shower physics, testing representations, and generating controlled datasets.
+### Stage II — Physics-informed FastMC
+
+The Fast Monte Carlo will provide a transparent and computationally inexpensive environment for learning shower physics, testing representations, and generating controlled datasets.
 
 - **Block 4 — Longitudinal electromagnetic shower profile:** model energy deposition versus depth in radiation lengths.
 - **Block 5 — Lateral shower distribution:** model transverse spreading relative to the shower axis and the Molière scale.
-- **Block 6 — Stochastic event generation:** sample physically meaningful event-to-event variation with reproducible random-number control.
+- **Block 6 — Stochastic event generation:** sample physically meaningful event-to-event variation with reproducible random-number control, including explicitly documented approximations for proton-event diversity.
 - **Block 7 — Detector response and digitization:** model visible energy, sampling fluctuations, noise, thresholds, saturation, and calibration effects only when each component is justified.
 - **Block 8 — FastMC dataset generation and validation:** generate versioned datasets and compare distributions, containment, energy response, and resolution with documented validation targets.
 
-A credible proton model is substantially harder than an electromagnetic parameterization. Any simplified hadronic model will be labeled explicitly and will not be presented as equivalent to a full particle-transport simulation.
+A credible proton model is substantially harder than an electromagnetic parameterization. Any phenomenological hadronic model will be labeled explicitly and will not be presented as equivalent to full particle transport.
 
-### 3. Geant4 reference simulation
+**Stage exit condition:** class labels must not be inferable from accidental simulator artifacts such as incompatible energy spectra, padding conventions, seed reuse, or label-dependent detector noise.
 
-A separate C++/Geant4 path will provide a higher-fidelity reference and a way to quantify the limitations of FastMC.
+### Stage III — Geant4 reference simulation
+
+A separate C++/Geant4 path will provide a higher-fidelity reference and quantify the limitations of FastMC.
 
 - **Block 9 — Geant4/C++ foundation:** establish the build system, executable structure, reproducible seeds, and run configuration.
-- **Block 10 — Simplified ECAL geometry:** reproduce the documented sampling structure at the level needed for the research question.
+- **Block 10 — Simplified ECAL geometry:** reproduce the documented sampling structure at the level required by the research question.
 - **Block 11 — Physics list:** select and justify electromagnetic and hadronic physics processes.
-- Add primary-particle generation, sensitive-detector scoring, event export, and validation only after the foundation is verified.
-- Compare FastMC and Geant4 observables before using either source for final model claims.
+- **Block 12 — Primary generation:** define particle, energy, angle, and impact-position sampling.
+- **Block 13 — Sensitive detector and export:** aggregate deposits into the canonical event schema.
+- **Block 14 — FastMC–Geant4 validation:** compare response, longitudinal development, lateral containment, hit multiplicity, shower start, and discriminating variables.
 
-Geant4 output will be translated into the same canonical event schema as FastMC so downstream preprocessing and model evaluation do not depend on the simulation backend.
+Geant4 output will use the same canonical schema as FastMC so downstream model comparisons do not depend on the simulation backend.
 
-### 4. Dataset construction and preprocessing
+### Stage IV — Focused first study
+
+This stage is the first intended publishable study. It deliberately limits the number of fully tuned model families.
+
+#### Primary representations
+
+1. **Physics-engineered features**, including longitudinal, lateral, containment, and track-consistency observables.
+2. **Track-centered alternating-view strip**, initially $18 \times 21$.
+
+Additional representations—two-view branches, layer tokens, sparse graphs, or learned latent spaces—will be explored only if the primary representation study reveals a clear need.
+
+#### Classical and quantum-inspired baselines
+
+The first study will establish:
+
+- logistic regression as a sanity baseline;
+- gradient-boosted decision trees on physics features;
+- a compact CNN on the calorimeter strip;
+- a strong CvT- or transformer-inspired reference when computationally feasible;
+- a classical tensor-network or connectivity-matched hierarchical model as a control for QCNN-like inductive bias.
+
+The purpose is not to test every classical algorithm. It is to provide simple, strong, and structurally matched controls.
+
+#### Quantum model screening
+
+The mandatory quantum portfolio is limited to:
+
+- a quantum kernel with matched classical kernels;
+- a variational quantum classifier with documented encoding and trainability diagnostics;
+- one hierarchical quantum family, selected from a generic QCNN or quantum tree tensor network after low-cost screening.
+
+Quantum-kernel, VQC, and hierarchical models may all be screened, but only the strongest and most stable configurations will enter the expensive confirmation stage.
+
+#### Core experimental regimes
+
+The first study prioritizes:
+
+- standard same-distribution evaluation;
+- low-data learning curves;
+- performance across energy bins;
+- class-imbalanced evaluation relevant to proton-background rejection;
+- optional FastMC-to-Geant4 transfer after Stage III is validated.
+
+Noise, real-hardware execution, comprehensive detector degradation, quantum transformers, quanvolution, quantum autoencoders, and Boltzmann-machine variants are later or separate studies rather than first-paper requirements.
+
+### Stage V — Conditional mechanism and architecture study
+
+A new architecture will be developed only if at least two independent experiments identify a consistent, interpretable beneficial bias—for example:
+
+- track-centering improves both classical and quantum sample efficiency;
+- alternating-view parameter sharing improves generalization;
+- superlayer-aligned pooling outperforms arbitrary hierarchy;
+- local data re-uploading improves trainability or low-data performance;
+- the effect survives a connectivity-matched classical tensor-network control.
+
+A candidate direction is a **track-centered alternating-view hierarchical quantum network** that:
+
+- separates total energy from normalized shower shape;
+- applies shared local encoders to layer neighborhoods;
+- respects X/Y readout orientation;
+- pools according to ECAL superlayer structure;
+- models cross-view consistency;
+- retains a small classical residual path for simple global physics variables.
+
+This is a falsifiable architectural hypothesis, not a promised final model.
+
+### Stage VI — Conditional robustness and execution study
+
+Only successful finalists will proceed to:
+
+- finite-shot evaluation;
+- noise-aware simulation;
+- detector perturbations and calibration shifts;
+- FastMC–Geant4 domain transfer;
+- hardware-topology compilation;
+- limited quantum-hardware validation.
+
+Hardware execution will validate implementation and noise trends. It will not be used to rescue a model that fails under controlled simulation.
+
+## Dataset construction and leakage control
 
 The data pipeline will:
 
 1. preserve event provenance, particle type, energy, direction, simulation version, configuration hash, and random seed;
 2. project the tracker state through all 18 ECAL layers;
 3. map each projection to the correct alternating readout coordinate;
-4. extract a boundary-safe $18 \times 21$ crop;
-5. apply transformations fitted on the training partition only;
-6. produce deterministic train, validation, and test splits;
-7. prevent duplicated seeds, related events, or preprocessing statistics from leaking across splits.
-
-The primary 21-cell crop will be challenged through a crop-width ablation. Energy scaling, normalization, compression, and feature selection will also be treated as experimental choices rather than hidden preprocessing.
+4. extract boundary-safe local strips;
+5. fit all transformations on the training partition only;
+6. produce deterministic train, validation, and test partitions;
+7. prevent related events, repeated seeds, or preprocessing statistics from crossing split boundaries;
+8. check that class differences are not caused by mismatched generation conditions.
 
 Real AMS-02 flight data will be used only if a legitimate, documented source and the necessary permissions become available. Simulated data will always be identified as simulated.
 
-### 5. Classical baselines
+## Fair-comparison protocol
 
-Classical models establish whether the representation itself is informative and provide the comparison required to interpret a QML result. Candidate baselines include:
+Final model comparisons will be designed around four controls.
 
-- logistic regression or another simple linear classifier;
-- a multilayer perceptron;
-- a compact convolutional neural network;
-- parameter-matched or capacity-aware controls for the Q-CNN.
+### Feature matching
 
-Hyperparameter search budgets, early stopping, preprocessing, data splits, and evaluation rules will be kept as comparable as practical across model families.
+Quantum and classical models receive the same input information unless the representation itself is the experimental variable.
 
-### 6. Quantum representation and Q-CNN
+### Capacity matching
 
-Because an $18 \times 21$ crop contains 378 values, it cannot be mapped naively to a small near-term circuit without a deliberate compression or encoding strategy. The quantum stage will therefore document:
+Models will be compared at multiple approximate parameter budgets where possible. Matched compact controls and larger best-achievable classical references answer different questions and will both be reported.
 
-- the classical feature-reduction step, if used;
-- the number of qubits and encoded features;
-- the data-encoding map and its scaling domain;
-- convolution and pooling circuit ansätze;
-- parameter sharing and circuit depth;
-- measurement observables and classical readout;
-- differentiation method, optimizer, initialization, and shot model;
-- simulator or hardware backend and all execution settings.
+### Search-budget matching
 
-The Q-CNN will first be evaluated on a noiseless simulator. Finite-shot and noise-aware experiments may follow as separate conditions. Hardware results, if attempted, will not be mixed silently with simulator results.
+Model families will receive comparable hyperparameter trials, random seeds, early-stopping opportunities, and validation information.
 
-### 7. Evaluation and benchmarking
+### Resource reporting
 
-The final comparison will report more than a single accuracy value.
+Experiments will record:
 
-**Physics and classification metrics**
+- trainable and preprocessing parameter counts;
+- qubit count;
+- circuit depth and two-qubit gate count;
+- number of circuit evaluations and shots;
+- simulator or hardware backend;
+- wall-clock time and peak classical memory;
+- random seeds and exact configurations.
 
-- ROC AUC;
-- proton rejection at fixed electron efficiency;
+## Evaluation protocol
+
+The primary physics endpoint is
+
+$$
+\text{proton rejection at fixed electron efficiency},
+$$
+
+with operating points such as 80%, 90%, and 95% electron efficiency reported when statistically supported.
+
+Additional metrics include:
+
+- ROC AUC and partial AUC in the low-background region;
 - precision–recall behavior under class imbalance;
-- confusion matrices and score distributions;
-- calibration where probabilistic scores are interpreted;
-- performance versus energy, incidence angle, containment, and boundary proximity.
-
-**Training and resource metrics**
-
-- trainable parameter count;
-- qubit count, circuit depth, and two-qubit gate count;
+- score distributions and confusion matrices;
+- calibration and Brier score when probabilities are interpreted;
+- performance versus energy, incidence angle, containment, and detector boundary distance;
+- learning-curve slope and sample efficiency;
+- performance per parameter and per circuit evaluation;
 - optimization stability and gradient behavior;
-- wall-clock and execution cost;
-- mean performance and uncertainty across multiple random seeds.
+- mean performance and uncertainty across repeated seeds.
 
-**Planned ablations**
+Screening experiments may use fewer seeds and reduced data. Final confirmation will freeze the test set, use repeated independent runs, report confidence intervals, and account for multiple architecture comparisons where necessary.
 
-- crop width and containment;
-- tracker-centered versus alternative centering;
-- preprocessing and feature compression;
-- encoding map;
-- circuit depth and pooling;
-- finite-shot sampling and noise;
-- FastMC versus Geant4 training and evaluation domains.
+## Pre-registered hypotheses
 
-Statistical uncertainty, repeated runs, and confidence intervals will be reported wherever they are needed to distinguish a real effect from seed variation.
+The first study will test a small number of falsifiable hypotheses rather than search indefinitely for a positive result:
+
+- **H1 — Track centering:** track-centered representations improve performance or sample efficiency over uncentered strips.
+- **H2 — Alternating views:** orientation-aware models outperform architectures that treat the strip as an ordinary image.
+- **H3 — Hierarchical bias:** superlayer-aligned hierarchy is more useful than arbitrary connectivity.
+- **H4 — Low-data behavior:** structured compact models approach their asymptotic performance with fewer events than larger references.
+- **H5 — Energy dependence:** architecture differences become more visible in difficult energy or containment regimes than in aggregate metrics.
+- **H6 — Quantum specificity:** any quantum-model improvement survives comparison with a classically simulated model using the same topology.
+- **H7 — Null result:** after strong controls and equal tuning, no quantum model provides a statistically meaningful improvement.
+
+H7 is a valid scientific outcome.
+
+## Decision gates and stopping points
+
+The project uses explicit gates so that the broad research map does not become an obligation to implement every idea.
+
+### Gate A — Simulation validity
+
+Do not begin headline ML comparisons until the event distributions and detector response pass documented validation checks.
+
+### Gate B — Representation validity
+
+Retain only representations that demonstrate credible containment, leakage resistance, and useful classical-baseline performance.
+
+### Gate C — Quantum feasibility
+
+Discard quantum configurations with unstable gradients, impractical depth, excessive simulation cost, severe kernel concentration, or performance indistinguishable from trivial controls.
+
+### Gate D — Architecture eligibility
+
+Develop a new architecture only after multiple experiments identify a reproducible beneficial inductive bias.
+
+### Gate E — Claim eligibility
+
+Claims must match the evidence. Results based only on simplified simulation may support a controlled benchmark claim, not an operational state-of-the-art claim for AMS-02 flight classification.
+
+Each gate is a valid stopping point. The project may produce a simulation paper, representation study, controlled negative QML result, benchmark paper, or architecture paper without requiring every later stage.
 
 ## Research safeguards
 
@@ -182,12 +329,12 @@ Scientific constants and modeling choices are intentionally separated:
 
 - **Verified detector fact:** supported directly by an authoritative detector source.
 - **Derived quantity:** calculated from documented values.
-- **Modeling assumption:** introduced by this simplified simulation.
+- **Modeling assumption:** introduced by the simplified simulation.
 - **Validation target:** an external performance or distribution that the implementation should reproduce within a stated tolerance.
 
-Detector constants belong in versioned configuration files such as [`configs/geometry.yaml`](configs/geometry.yaml). Python code loads, derives, and validates those values; it should not create a second undocumented source of truth.
+Detector constants belong in versioned configuration files such as [`configs/geometry.yaml`](configs/geometry.yaml). Python code loads, derives, and validates those values; it must not create a second undocumented source of truth.
 
-The project will also preserve:
+The project will preserve:
 
 - fixed and recorded random seeds;
 - locked software environments;
@@ -196,7 +343,7 @@ The project will also preserve:
 - train/test isolation;
 - comparable baseline budgets;
 - negative results and failed hypotheses;
-- exact code and configuration revisions used for reported figures and tables.
+- exact code, data, and configuration revisions used for reported figures and tables.
 
 ## Development approach
 
@@ -211,7 +358,7 @@ The repository uses a modular, object-oriented hybrid design:
 
 Reusable simulator logic belongs under `src/ams_ecal/`. Notebooks may explain and exercise that logic, but they must not become a competing implementation.
 
-The repository grows one block at a time. Future directories and placeholder modules are not created before their first real use.
+The repository grows one block at a time. The long-term roadmap guides scientific decisions, but future directories, placeholder modules, and unused dependencies are not created before their first real use.
 
 ## Current repository state
 
@@ -231,9 +378,12 @@ Blocks 0 and 1 are complete. The repository currently supports continuous detect
 | Projection through all 18 ECAL layer centers | Complete and notebook-validated |
 | Tracker-state and projection notebook | Complete and executable |
 | Alternating readout orientation and cell mapping | Next: Block 2 |
+| Canonical event schema | Planned: Block 3 |
 | Shower simulation and detector response | Planned: Blocks 4–8 |
-| Geant4 reference simulation | Planned: Blocks 9–11 and later extensions |
-| Classical and quantum ML models | Planned after validated simulation and preprocessing |
+| Geant4 reference simulation | Planned: Blocks 9–14 |
+| Focused classical–quantum benchmark | Planned after validated simulation and preprocessing |
+| Novel detector-specific architecture | Conditional on benchmark evidence |
+| Quantum hardware study | Optional and conditional |
 
 No file marked as a draft should be interpreted as a validated scientific implementation.
 
@@ -302,10 +452,10 @@ Primary detector information and later modeling decisions will be traced to auth
 - [AMS-02 ECAL reconstruction description](https://ams02.space/advances-data-analysis/new-reconstruction-method-electromagnetic-calorimeter-ecal-analysis)
 - [Particle Data Group reviews](https://pdg.lbl.gov/)
 
-Additional papers will be cited next to the equations, parameters, or validation targets they support.
+Algorithmic and QML papers will be recorded in a structured literature matrix that captures the task, data, representation, preprocessing, quantum resources, classical controls, validation protocol, noise model, claims, and unresolved weaknesses. References will be cited next to the equations, parameters, architectural decisions, or validation targets they support.
 
 ## Independence and limitations
 
 This is an independent academic research project. It is not an official AMS Collaboration software package and is not endorsed by AMS-02, CERN, NASA, or the International Space Station program.
 
-Until validated against authoritative references and a higher-fidelity simulation, generated events must be treated as research approximations. Any eventual conclusions will be limited by simulation fidelity, dataset construction, preprocessing choices, finite sample size, and the scale of the quantum experiments.
+Until validated against authoritative references and a higher-fidelity simulation, generated events must be treated as research approximations. Any eventual conclusions will be limited by simulation fidelity, dataset construction, preprocessing choices, finite sample size, classical-control strength, quantum simulation scale, and access to representative data.
