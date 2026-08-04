@@ -10,7 +10,7 @@ This repository supports a **long-term research direction**, not a commitment to
 
 The project does **not** assume that a quantum model will outperform a classical model. A rigorous negative result—showing where quantum models fail to improve upon strong controls—would still be scientifically useful.
 
-### Long-term research question
+### Long-term research direction
 
 > Under matched data, optimization, and resource budgets, which classical, quantum-inspired, and quantum architectures are most suitable for AMS-02 ECAL proton rejection, and are there physically meaningful regimes in which quantum models provide superior predictive performance, sample efficiency, parameter efficiency, robustness, or memory-related advantages?
 
