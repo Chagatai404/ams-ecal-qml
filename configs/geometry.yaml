@@ -16,6 +16,10 @@ readout:
   cells_per_layer: 72
   cell_pitch: 9.0
 
+  # Ordered from the ECAL front face toward the back.
+  # Each superlayer contains two readout layers with the same fiber axis.
+  superlayer_fiber_axes: [x, y, x, y, x, y, x, y, x]
+
 material_depth:
   radiation_lengths: 17.0
   interaction_lengths: 0.6
