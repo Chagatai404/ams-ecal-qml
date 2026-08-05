@@ -2,6 +2,7 @@ from collections.abc import Mapping
 from dataclasses import dataclass
 from math import isclose, isfinite
 from pathlib import Path
+from typing import Literal
 
 import yaml
 
@@ -12,6 +13,7 @@ EXPECTED_UNITS = {
     "energy": "MeV",
 }
 
+FiberAxis = Literal["x", "y"]
 
 class GeometryConfigError(ValueError):
     """Raised when a geometry configuration is malformed or unsupported."""
@@ -29,6 +31,8 @@ class ECALGeometry:
     number_of_layers: int
     cells_per_layer: int
     cell_pitch_mm: float
+
+    superlayer_fiber_axes: tuple[FiberAxis, ...]
 
     total_depth_x0: float
     total_depth_lambda_i: float
@@ -66,6 +70,35 @@ class ECALGeometry:
 
             if value <= 0:
                 raise ValueError(f"{name} must be positive")
+
+        if not isinstance(self.superlayer_fiber_axes, tuple):
+            raise TypeError("superlayer_fiber_axes must be a tuple")
+
+        if len(self.superlayer_fiber_axes) != self.number_of_superlayers:
+            raise ValueError(
+                "superlayer_fiber_axes must contain one axis per superlayer"
+            )
+
+        for axis in self.superlayer_fiber_axes:
+            if not isinstance(axis, str):
+                raise TypeError(
+                    "each superlayer fiber axis must be a string"
+                )
+
+            if axis not in {"x", "y"}:
+                raise ValueError(
+                    "each superlayer fiber axis must be either 'x' or 'y'"
+                )
+
+        expected_fiber_axes = tuple(
+            "x" if index % 2 == 0 else "y"
+            for index in range(self.number_of_superlayers)
+        )
+
+        if self.superlayer_fiber_axes != expected_fiber_axes:
+            raise ValueError(
+                "superlayer_fiber_axes must alternate starting with 'x'"
+            )
 
         if self.number_of_layers != 2 * self.number_of_superlayers:
             raise ValueError(
@@ -111,6 +144,16 @@ class ECALGeometry:
 
         return self.number_of_layers * self.cells_per_layer
 
+    @property
+    def layer_fiber_axes(self) -> tuple[FiberAxis, ...]:
+        """Expand each superlayer fiber axis to its two readout layers."""
+
+        return tuple(
+            axis
+            for axis in self.superlayer_fiber_axes
+            for _ in range(2)
+        )
+    
     @property
     def mean_readout_slice_thickness_mm(self) -> float:
         """Return the active depth divided uniformly among readout layers.
@@ -252,6 +295,7 @@ def load_geometry(config_path: str | Path) -> ECALGeometry:
             "number_of_layers",
             "cells_per_layer",
             "cell_pitch",
+            "superlayer_fiber_axes",
         },
         "readout",
     )
@@ -266,6 +310,15 @@ def load_geometry(config_path: str | Path) -> ECALGeometry:
         "coordinate_system",
     )
 
+    raw_fiber_axes = readout["superlayer_fiber_axes"]
+
+    if not isinstance(raw_fiber_axes, list):
+        raise GeometryConfigError(
+            "readout.superlayer_fiber_axes must be a YAML sequence"
+        )
+
+    superlayer_fiber_axes = tuple(raw_fiber_axes)
+
     try:
         return ECALGeometry(
             width_x_mm=active_volume["width_x"],
@@ -275,6 +328,7 @@ def load_geometry(config_path: str | Path) -> ECALGeometry:
             number_of_layers=readout["number_of_layers"],
             cells_per_layer=readout["cells_per_layer"],
             cell_pitch_mm=readout["cell_pitch"],
+            superlayer_fiber_axes=superlayer_fiber_axes,
             total_depth_x0=material_depth["radiation_lengths"],
             total_depth_lambda_i=material_depth["interaction_lengths"],
             origin=coordinate_system["origin"],
