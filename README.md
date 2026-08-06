@@ -140,8 +140,7 @@ Block 3 defines a stable, immutable event contract shared by future FastMC gener
 The canonical energy grid is
 
 $$
-\mathbf{E}
-=
+\mathbf{E} =
 (E_{\ell c})
 \in
 \mathbb{R}_{\geq 0}^{18 \times 72},
@@ -152,8 +151,7 @@ where $E_{\ell c}$ is the energy recorded in cell $c$ of readout layer $\ell$. I
 The incident primary energy and recorded ECAL energy are distinct quantities:
 
 $$
-E_{\mathrm{ECAL}}
-=
+E_{\mathrm{ECAL}} =
 \sum_{\ell=0}^{17}
 \sum_{c=0}^{71}
 E_{\ell c}.
