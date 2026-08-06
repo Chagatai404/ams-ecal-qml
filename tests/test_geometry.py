@@ -11,6 +11,38 @@ from ams_ecal.geometry import (
 
 CONFIG_PATH = Path(__file__).parents[1] / "configs" / "geometry.yaml"
 
+SUPERLAYER_FIBER_AXES = (
+    "x",
+    "y",
+    "x",
+    "y",
+    "x",
+    "y",
+    "x",
+    "y",
+    "x",
+)
+
+LAYER_FIBER_AXES = (
+    "x",
+    "x",
+    "y",
+    "y",
+    "x",
+    "x",
+    "y",
+    "y",
+    "x",
+    "x",
+    "y",
+    "y",
+    "x",
+    "x",
+    "y",
+    "y",
+    "x",
+    "x",
+)
 
 def valid_geometry_values() -> dict[str, object]:
     return {
@@ -21,6 +53,7 @@ def valid_geometry_values() -> dict[str, object]:
         "number_of_layers": 18,
         "cells_per_layer": 72,
         "cell_pitch_mm": 9.0,
+        "superlayer_fiber_axes": SUPERLAYER_FIBER_AXES,
         "total_depth_x0": 17.0,
         "total_depth_lambda_i": 0.6,
         "origin": "front_face_center",
@@ -49,6 +82,7 @@ def test_loads_documented_geometry() -> None:
     assert geometry.cell_pitch_mm == pytest.approx(9.0)
     assert geometry.total_depth_x0 == pytest.approx(17.0)
     assert geometry.total_depth_lambda_i == pytest.approx(0.6)
+    assert geometry.superlayer_fiber_axes == SUPERLAYER_FIBER_AXES
 
 
 def test_derives_geometry_invariants() -> None:
@@ -62,6 +96,7 @@ def test_derives_geometry_invariants() -> None:
     assert geometry.x_bounds_mm == pytest.approx((-324.0, 324.0))
     assert geometry.y_bounds_mm == pytest.approx((-324.0, 324.0))
     assert geometry.z_bounds_mm == pytest.approx((0.0, 166.5))
+    assert geometry.layer_fiber_axes == LAYER_FIBER_AXES
 
 
 @pytest.mark.parametrize(
@@ -73,6 +108,30 @@ def test_derives_geometry_invariants() -> None:
         ("number_of_layers", 17, ValueError, "twice"),
         ("width_x_mm", 647.0, ValueError, "cells_per_layer"),
         ("origin", "center", ValueError, "front_face_center"),
+        (
+            "superlayer_fiber_axes",
+            ["x", "y", "x", "y", "x", "y", "x", "y", "x"],
+            TypeError,
+            "must be a tuple",
+        ),
+        (
+            "superlayer_fiber_axes",
+            ("x", "y", "x"),
+            ValueError,
+            "one axis per superlayer",
+        ),
+        (
+            "superlayer_fiber_axes",
+            ("x", "y", "x", "y", "z", "y", "x", "y", "x"),
+            ValueError,
+            "either 'x' or 'y'",
+        ),
+        (
+            "superlayer_fiber_axes",
+            ("y", "x", "y", "x", "y", "x", "y", "x", "y"),
+            ValueError,
+            "alternate starting with 'x'",
+        ),
     ],
 )
 def test_rejects_invalid_geometry_values(
@@ -87,7 +146,17 @@ def test_rejects_invalid_geometry_values(
     with pytest.raises(error_type, match=message):
         ECALGeometry(**values)
 
+def test_rejects_non_sequence_superlayer_fiber_axes(
+    tmp_path: Path,
+) -> None:
+    def change(config: dict[str, object]) -> None:
+        config["readout"]["superlayer_fiber_axes"] = "xyxyxyxyx"
 
+    path = write_modified_config(tmp_path, change)
+
+    with pytest.raises(GeometryConfigError, match="YAML sequence"):
+        load_geometry(path)
+        
 def test_rejects_missing_config_file(tmp_path: Path) -> None:
     with pytest.raises(FileNotFoundError, match="not found"):
         load_geometry(tmp_path / "missing.yaml")
