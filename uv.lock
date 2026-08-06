@@ -7,6 +7,7 @@ name = "ams-ecal-qml"
 version = "0.1.0"
 source = { editable = "." }
 dependencies = [
+    { name = "numpy" },
     { name = "pyyaml" },
 ]
 
@@ -20,7 +21,10 @@ dev = [
 ]
 
 [package.metadata]
-requires-dist = [{ name = "pyyaml", specifier = ">=6.0.3,<7" }]
+requires-dist = [
+    { name = "numpy", specifier = ">=2.5.1,<3" },
+    { name = "pyyaml", specifier = ">=6.0.3,<7" },
+]
 
 [package.metadata.requires-dev]
 dev = [

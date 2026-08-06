@@ -2,7 +2,7 @@
 
 A physics-informed research program for simulating the AMS-02 Electromagnetic Calorimeter (ECAL) and conducting resource-matched comparisons of classical, quantum-inspired, and quantum models for electromagnetic-shower versus proton-background classification.
 
-> **Research status:** early development. Blocks 0–2 are complete: the repository includes a validated simplified ECAL geometry, an immutable reconstructed-track model, straight-line projection through all 18 ECAL layer centers, alternating readout orientations, and boundary-safe mapping from continuous projected coordinates to discrete ECAL cells. Block 3—the canonical event model—is next.
+> **Research status:** early development. Stage I is complete: Blocks 0–3 now provide a validated simplified ECAL geometry, an immutable reconstructed-track model, straight-line projection through all 18 ECAL layer centers, alternating readout orientations, boundary-safe cell mapping, and a versioned canonical event representation with reproducibility metadata. Block 4—longitudinal electromagnetic shower modeling—is next.
 
 ## Project scope
 
@@ -124,6 +124,54 @@ $$
 
 This is a layer-wise projected strip, not a conventional square image crop. The width of 21 cells is a hypothesis to be tested through containment and crop-size ablations, not an assumed optimum.
 
+### Canonical event representation
+
+Block 3 defines a stable, immutable event contract shared by future FastMC generation, Geant4 export, preprocessing, storage, validation, and model-input construction. One `ECALEvent` contains:
+
+- a unique event identifier;
+- primary-particle truth: `electron`, `positron`, or `proton`;
+- the incident primary energy in MeV;
+- the reconstructed `TrackState`;
+- the validated `ECALGeometry` used to interpret the event;
+- a nonnegative finite ECAL energy grid;
+- versioned simulation provenance;
+- an explicit event-schema version.
+
+The canonical energy grid is
+
+$$
+\mathbf{E}
+=
+(E_{\ell c})
+\in
+\mathbb{R}_{\geq 0}^{18 \times 72},
+$$
+
+where $E_{\ell c}$ is the energy recorded in cell $c$ of readout layer $\ell$. In Python, the grid is stored as an immutable tuple of immutable layer tuples. Its dimensions are validated against the associated geometry rather than against duplicated hard-coded constants.
+
+The incident primary energy and recorded ECAL energy are distinct quantities:
+
+$$
+E_{\mathrm{ECAL}}
+=
+\sum_{\ell=0}^{17}
+\sum_{c=0}^{71}
+E_{\ell c}.
+$$
+
+`ECALEvent` exposes both per-layer energy sums and the total ECAL energy as derived properties. It does not impose $E_{\mathrm{ECAL}}\leq E_{\mathrm{primary}}$ as a software invariant, because later detector noise, calibration effects, numerical approximations, and reconstruction corrections may alter the measured sum.
+
+Tracker-projected cell indices are also derived from the stored track and geometry rather than stored independently. This avoids two conflicting sources of truth: a track and a separately persisted projection that could disagree.
+
+Each event carries an `EventProvenance` record containing:
+
+- simulation backend: `fastmc` or `geant4`;
+- simulation version;
+- a lowercase SHA-256 configuration digest;
+- a nonnegative random seed.
+
+The event schema is currently identified by `EVENT_SCHEMA_VERSION = 1`. Unsupported versions fail explicitly instead of being interpreted silently. Block 3 defines structure and provenance only; it does not yet generate a physical shower, model detector response, crop the event, assign an ML label, or serialize a dataset.
+
 ## Research methodology
 
 ```mermaid
@@ -159,7 +207,7 @@ The first stage defines the scientific coordinate system and canonical objects u
 - **Block 2 — Readout orientation and cell mapping:** encode alternating ECAL views and convert projected coordinates into valid cell indices.
 - **Block 3 — Canonical event model:** define one stable event representation shared by simulation, preprocessing, storage, and machine-learning code.
 
-**Stage exit condition:** all simulation backends and preprocessing code must target the same validated event schema.
+**Stage I status:** complete. All later simulation backends, dataset writers, and preprocessing code are required to target the validated versioned event schema rather than introduce backend-specific event formats.
 
 ### Stage II — Physics-informed FastMC
 
@@ -413,9 +461,21 @@ The repository grows one block at a time. The long-term roadmap guides scientifi
 
 ## Current repository state
 
-Blocks 0, 1, and 2 are complete. The repository now supports validated detector geometry, straight-line tracker projection, alternating fiber and measured-axis conventions, and discrete cell mapping across all 18 readout layers.
+Blocks 0–3 are complete, closing Stage I. The repository now supports validated detector geometry, immutable reconstructed tracks, straight-line projection, alternating readout conventions, discrete cell mapping across all 18 layers, and a canonical energy-bearing event object.
 
-It does not yet define a canonical event object, energy-deposition arrays, the $18 \times 21$ track-centered crop, or shower simulation. Those responsibilities begin in Block 3 and later stages.
+The canonical event layer adds:
+
+- immutable `ECALEvent` and `EventProvenance` dataclasses;
+- a geometry-validated $18 \times 72$ nonnegative energy grid;
+- primary-particle truth and incident energy;
+- derived tracker-projected cells;
+- derived layer and total ECAL energies;
+- explicit schema versioning;
+- simulation backend, version, configuration hash, and random-seed provenance;
+- unit tests for valid construction, immutability, shape, numeric domains, supported categorical values, provenance, and derived quantities;
+- an executable diagnostic notebook that constructs and visualizes a canonical event without presenting the artificial deposits as a physical shower.
+
+The repository does not yet contain a physical longitudinal or lateral shower model, stochastic FastMC event generation, detector response, the $18 \times 21$ track-centered crop, or an end-to-end dataset pipeline. Those responsibilities begin with Block 4 and later stages.
 
 | Item | Status |
 |---|---|
@@ -434,9 +494,14 @@ It does not yet define a canonical event object, energy-deposition arrays, the $
 | Layer-specific projected-coordinate selection | Complete and tested |
 | Track projection to 18 optional cell indices | Complete and tested |
 | Readout orientation and cell-mapping notebook | Complete and executable |
-| Canonical event schema | Next: Block 3 |
-| Track-centered $18 \times 21$ crop | Planned after the event model |
-| Shower simulation and detector response | Planned: Blocks 4–8 |
+| Canonical `ECALEvent` schema | Complete and tested |
+| Immutable $18 \times 72$ energy grid validation | Complete and tested |
+| Event provenance and schema versioning | Complete and tested |
+| Derived layer energy, total ECAL energy, and projected cells | Complete and tested |
+| Canonical event-model notebook | Complete and executable |
+| Longitudinal electromagnetic shower profile | Next: Block 4 |
+| Track-centered $18 \times 21$ crop | Planned after the event and shower foundations |
+| Remaining FastMC and detector response | Planned: Blocks 5–8 |
 | Geant4 reference simulation | Planned: Blocks 9–14 |
 | Focused classical–quantum benchmark | Planned after validated simulation and preprocessing |
 | Novel detector-specific architecture | Conditional on benchmark evidence |
@@ -455,14 +520,17 @@ Only currently created paths are shown:
 ├── notebooks/
 │   ├── 00_ecal_calorimetry_and_geometry.ipynb
 │   ├── 01_tracker_state_and_projection.ipynb
-│   └── 02_readout_orientation_and_cell_mapping.ipynb
+│   ├── 02_readout_orientation_and_cell_mapping.ipynb
+│   └── 03_canonical_event_model.ipynb
 ├── src/
 │   └── ams_ecal/
 │       ├── __init__.py
+│       ├── event.py
 │       ├── geometry.py
 │       ├── readout.py
 │       └── tracking.py
 ├── tests/
+│   ├── test_event.py
 │   ├── test_geometry.py
 │   ├── test_readout.py
 │   └── test_tracking.py
@@ -502,7 +570,7 @@ uv run ruff check .
 uv run pytest -q
 ```
 
-All three notebooks should also run from beginning to end after restarting their kernels. The simulator is not yet runnable end to end. Runtime scientific dependencies will be added only when the active block demonstrates a real need for them.
+All four notebooks should also run from beginning to end after restarting their kernels. The simulator is not yet runnable end to end: Block 3 provides the event contract, while physical shower generation begins in Block 4. Runtime scientific dependencies will be added only when the active block demonstrates a real need for them.
 
 ## References
 
