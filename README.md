@@ -480,7 +480,7 @@ The geometry fidelity pass:
 - explicitly separates ideal detector geometry from detector conditions;
 - adds `notebooks/04_ecal_geometry_fidelity.ipynb`.
 
-**Geometry fidelity status: complete pending full repository closure checks.**
+**Geometry fidelity status: complete.**
 
 ## Stage II — Physics-informed FastMC
 
