@@ -1,0 +1,27 @@
+schema_version: 1
+
+longitudinal_em:
+
+  # Effective critical-energy scale used by the simplified
+  # electromagnetic shower parameterization.
+  #
+  # This is a model parameter, not a claim that the heterogeneous
+  # AMS-02 lead/scintillating-fiber structure has one exact material
+  # critical energy. It will later be validated and, if necessary,
+  # retuned against higher-fidelity simulation or test-beam results.
+
+  effective_critical_energy_mev: 7.4
+
+  # Rate parameter beta of the gamma-distribution longitudinal profile.
+  # This is the initial simplified FastMC assumption and is expected
+  # to be revisited during FastMC validation.
+
+  gamma_rate: 0.65 # Validated from https://ams02.space/advances-data-analysis/new-reconstruction-method-electromagnetic-calorimeter-ecal-analysis
+
+  # Approximate electron/positron correction in
+  #
+  #   t_max = ln(E / E_c) + shower_max_offset_x0
+  #
+  # with depth measured in radiation lengths.
+  
+  shower_max_offset_x0: -0.5

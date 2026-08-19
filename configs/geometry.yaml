@@ -1,9 +1,10 @@
-schema_version: 1
+schema_version: 2
 
 units:
   length: mm
   angle: rad
   energy: MeV
+  density: g/cm^3
 
 active_volume:
   width_x: 648.0
@@ -15,10 +16,30 @@ readout:
   number_of_layers: 18
   cells_per_layer: 72
   cell_pitch: 9.0
-
-  # Ordered from the ECAL front face toward the back.
-  # Each superlayer contains two readout layers with the same fiber axis.
+  photomultipliers: 324
+  anodes_per_photomultiplier: 4
+  approximate_fibers_per_cell: 35
   superlayer_fiber_axes: [x, y, x, y, x, y, x, y, x]
+
+sampling_structure:
+  superlayer_thickness: 18.5
+  absorber_foils_per_superlayer: 11
+  absorber_foil_thickness: 1.0
+  fiber_planes_per_superlayer: 10
+  fiber_diameter: 1.0
+  fiber_horizontal_pitch: 1.35
+  fiber_row_spacing: 1.73
+  adjacent_row_stagger_fraction: 0.5
+  standard_absorber_material: lead
+  terminal_foil_material: aluminum
+
+material_properties:
+  average_density: 6.8
+  relative_volume:
+    lead: 1.0
+    scintillating_fiber: 0.57
+    optical_glue: 0.15
+  effective_critical_energy: 7.6
 
 material_depth:
   radiation_lengths: 17.0
