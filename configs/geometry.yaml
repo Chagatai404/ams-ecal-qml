@@ -1,11 +1,13 @@
-schema_version: 1
+schema_version: 2
 
 units:
   length: mm
   angle: rad
   energy: MeV
+  density: g/cm^3
 
 active_volume:
+  # Active ECAL readout dimensions.
   width_x: 648.0
   width_y: 648.0
   depth_z: 166.5
@@ -13,15 +15,72 @@ active_volume:
 readout:
   number_of_superlayers: 9
   number_of_layers: 18
+
   cells_per_layer: 72
   cell_pitch: 9.0
 
+  # ECAL is read out by 324 four-anode PMTs.
+  # One anode corresponds to one calorimeter cell:
+  #
+  #   324 PMTs * 4 anodes = 1296 cells
+  #
+  # which must also equal
+  #
+  #   18 layers * 72 cells = 1296 cells.
+  photomultipliers: 324
+  anodes_per_photomultiplier: 4
+
+  # One 9 x 9 mm^2 cell collects light from approximately
+  # 35 scintillating fibers.
+  approximate_fibers_per_cell: 35
+
   # Ordered from the ECAL front face toward the back.
-  # Each superlayer contains two readout layers with the same fiber axis.
+  # Each superlayer contains fibers running in one direction.
   superlayer_fiber_axes: [x, y, x, y, x, y, x, y, x]
+
+sampling_structure:
+  superlayer_thickness: 18.5
+
+  # Each superlayer contains 11 grooved absorber-foil positions
+  # interleaved with 10 scintillating-fiber planes.
+  absorber_foils_per_superlayer: 11
+  absorber_foil_thickness: 1.0
+
+  fiber_planes_per_superlayer: 10
+  fiber_diameter: 1.0
+
+  # Fiber packing within the lead/fiber composite.
+  fiber_horizontal_pitch: 1.35
+  fiber_row_spacing: 1.73
+  adjacent_row_stagger_fraction: 0.5
+
+  # All normal absorber foils are lead. The final foil of the
+  # ninth (last) superlayer is aluminum.
+  standard_absorber_material: lead
+  terminal_foil_material: aluminum
+
+material_properties:
+  # Effective bulk density of the lead/fiber/glue composite.
+  average_density: 6.8
+
+  # Relative volume composition of the composite.
+  relative_volume:
+    lead: 1.0
+    scintillating_fiber: 0.57
+    optical_glue: 0.15
+
+  # Effective critical energy measured from ECAL test-beam data.
+  # This is a detector-level effective property and will be used
+  # by the electromagnetic shower model in Stage II.
+  effective_critical_energy: 7.6
 
 material_depth:
   radiation_lengths: 17.0
+
+  # Published descriptions quote approximately 0.6-0.7 nuclear
+  # interaction lengths depending on source/rounding. We retain
+  # 0.6 as the nominal value used by the detailed ECAL description
+  # and will revisit this before hadronic FastMC modeling.
   interaction_lengths: 0.6
 
 coordinate_system:
