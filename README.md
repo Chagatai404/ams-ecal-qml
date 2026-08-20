@@ -5,13 +5,12 @@ Calorimeter (ECAL) and conducting resource-matched comparisons of classical,
 quantum-inspired, and quantum models for electromagnetic-shower versus
 proton-background classification.
 
-> **Research status:** Stage I is complete. A pre-Block-4 **Geometry Fidelity
-> Pass** now upgrades the detector description to schema v2 while preserving
-> the validated Stage-I interfaces. The repository represents the documented
-> ECAL readout topology, physical lead/fiber sampling structure, effective
-> material properties, and finite longitudinal readout intervals. Detector
-> imperfections remain deliberately separate. **Block 4 — longitudinal
-> electromagnetic shower modeling — is next.**
+> **Research status:** Stage I, the pre-Block-4 **Geometry Fidelity Pass**, and
+> **Block 4 — longitudinal electromagnetic shower modeling — are complete.**
+> The repository now integrates an AMS-specific mean gamma profile over the 18
+> finite readout intervals while preserving physical longitudinal leakage.
+> Detector imperfections remain deliberately separate. **Block 5 — lateral
+> shower distribution — is next.**
 
 ## Project scope
 
@@ -418,6 +417,83 @@ physical shower.
 
 ---
 
+# Longitudinal electromagnetic shower model
+
+Block 4 supplies the deterministic mean longitudinal backbone for electron and
+positron showers. It does not yet generate complete `18 × 72` events.
+
+## Physics model
+
+With depth `t` measured in radiation lengths, the normalized mean
+energy-deposition density is modeled by the gamma profile
+
+```text
+f(t) = β (βt)^(α - 1) exp(-βt) / Γ(α)
+```
+
+with mode
+
+```text
+T = t_max = (α - 1) / β.
+```
+
+The gamma form is a phenomenological description of the average cascade, not
+an exact QED theorem. Bremsstrahlung and pair production create the branching
+cascade; the gamma profile summarizes its average rise, maximum, and decline.
+
+The model combines two documented ingredients:
+
+- the official AMS reconstruction value `β = 0.65`, which reflects the specific
+  ECAL construction and materials;
+- the PDG electron-shower approximation `T(E) = ln(E / E_c) - 0.5`.
+
+The gamma shape is therefore derived as:
+
+```text
+α(E) = 1 + β T(E).
+```
+
+The effective critical energy `E_c = 7.6 MeV` is read from the geometry's
+material properties. It is intentionally not duplicated in `fastmc.yaml`.
+
+`AMSLongitudinalGammaModel` provides:
+
+- mean shower-maximum depth;
+- energy-dependent gamma shape;
+- continuous normalized energy density;
+- finite-interval layer fractions;
+- ideal mean layer energies;
+- contained and leaked longitudinal fractions.
+
+Electron and positron mean profiles are identical in this block. Proton shower
+development requires a separate hadronic treatment.
+
+## Finite integration and leakage
+
+For each readout interval with bounds `[t_lower, t_upper]`, the layer fraction
+is
+
+```text
+F_layer = integral of f(t) from t_lower to t_upper.
+```
+
+The ideal mean layer energy is then:
+
+```text
+E_layer = E_primary × F_layer.
+```
+
+SciPy's regularized incomplete gamma function evaluates these integrals. The
+18 fractions are not renormalized to sum to one: the ECAL ends at 17 X₀, so the
+remaining continuous-profile tail represents physical longitudinal leakage.
+
+The model is explicitly a mean-profile approximation. Sampling-calorimeter
+corrections and correlated shower-to-shower fluctuations will be introduced in
+the stochastic generation block after the longitudinal and lateral mean models
+are independently validated.
+
+---
+
 # Research methodology
 
 ```mermaid
@@ -490,7 +566,7 @@ controlled datasets.
 
 - **Block 4 — Longitudinal electromagnetic shower profile:** model energy
   deposition versus depth in radiation lengths using a configurable shower
-  model and finite layer integration.
+  model and finite layer integration. **Complete.**
 - **Block 5 — Lateral shower distribution:** model transverse spread relative
   to the tracker-projected shower axis and Molière scale.
 - **Block 6 — Stochastic event generation:** introduce physically meaningful
@@ -838,7 +914,7 @@ modules are not created before their first real use.
 
 # Current repository state
 
-Blocks 0–3 are complete.
+Blocks 0–4 are complete.
 
 The Geometry Fidelity Pass upgrades the detector foundation for Stage II while
 preserving all existing Stage-I interfaces.
@@ -858,17 +934,20 @@ The repository currently supports:
 - discrete cell mapping across all 18 samplings;
 - canonical energy-bearing events;
 - simulation provenance.
+- a validated, immutable FastMC configuration;
+- an AMS-specific mean longitudinal gamma profile;
+- interval-integrated 18-layer energy fractions;
+- explicit finite-depth longitudinal leakage.
 
 The repository does **not** yet contain:
 
-- a physical longitudinal shower model;
 - a lateral shower model;
 - stochastic FastMC event generation;
 - detector-response simulation;
 - the final track-centered `18 × 21` representation;
 - an end-to-end dataset pipeline.
 
-Those responsibilities begin with Block 4.
+Those remaining responsibilities begin with Block 5.
 
 | Item | Status |
 |---|---|
@@ -890,8 +969,8 @@ Those responsibilities begin with Block 4.
 | Canonical `ECALEvent` schema | Complete |
 | Immutable `18 × 72` energy grid | Complete |
 | Event provenance and schema versioning | Complete |
-| Longitudinal electromagnetic shower profile | Next: Block 4 |
-| Lateral shower model | Planned: Block 5 |
+| Longitudinal electromagnetic shower profile | Complete: Block 4 |
+| Lateral shower model | Next: Block 5 |
 | Stochastic FastMC generation | Planned: Block 6 |
 | Detector response and digitization | Planned: Block 7 |
 | FastMC dataset generation and validation | Planned: Block 8 |
@@ -912,23 +991,29 @@ Only currently created paths are shown:
 ```text
 .
 ├── configs/
+│   ├── fastmc.yaml
 │   └── geometry.yaml
 ├── notebooks/
 │   ├── 00_ecal_calorimetry_and_geometry.ipynb
 │   ├── 01_tracker_state_and_projection.ipynb
 │   ├── 02_readout_orientation_and_cell_mapping.ipynb
 │   ├── 03_canonical_event_model.ipynb
-│   └── 04_ecal_geometry_fidelity.ipynb
+│   ├── 04_ecal_geometry_fidelity.ipynb
+│   └── 05_longitudinal_em_shower.ipynb
 ├── src/
 │   └── ams_ecal/
 │       ├── __init__.py
 │       ├── event.py
+│       ├── fastmc_config.py
 │       ├── geometry.py
+│       ├── longitudinal.py
 │       ├── readout.py
 │       └── tracking.py
 ├── tests/
 │   ├── test_event.py
+│   ├── test_fastmc_config.py
 │   ├── test_geometry.py
+│   ├── test_longitudinal.py
 │   ├── test_readout.py
 │   └── test_tracking.py
 ├── .gitignore
@@ -967,12 +1052,12 @@ uv run ruff check .
 uv run pytest -q
 ```
 
-All five notebooks should run from beginning to end after restarting their
+All six notebooks should run from beginning to end after restarting their
 kernels.
 
-The simulator is not yet runnable end to end: the canonical event contract and
-detector geometry are complete, while physical shower generation begins in
-Block 4.
+The simulator is not yet runnable end to end: the canonical event contract,
+detector geometry, and mean longitudinal electromagnetic profile are complete.
+Lateral energy distribution begins in Block 5.
 
 ---
 
@@ -991,6 +1076,10 @@ Initial references include:
   https://arxiv.org/abs/1210.0316
 - Particle Data Group:
   https://pdg.lbl.gov/
+- Grindhammer and Peters electromagnetic-shower parameterization:
+  https://arxiv.org/abs/hep-ex/0001020
+- Geant4 GFlash Physics Reference Manual:
+  https://geant4.web.cern.ch/documentation/pipelines/master/prm_html/PhysicsReferenceManual/electromagnetic/shower_parameterizations/parameterisation.html
 
 Later FastMC parameterizations, Geant4 choices, detector-response models, and
 QML algorithms will be cited next to the equations, assumptions, parameters, or
