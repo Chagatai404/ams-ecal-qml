@@ -1,3 +1,4 @@
+
 # AMS ECAL QML — Research Protocol
 
 This repository follows the [Scientific Research OS](https://github.com/Chagatai404/scientific-research-os) workflow.
@@ -26,6 +27,12 @@ Current research priority:
 > Determine whether electromagnetic and proton showers exhibit measurably different multiscale or multifractal structure in AMS ECAL after controlling for energy and geometry.
 
 QML remains a computational research branch. It is not assumed to provide an advantage.
+
+For the complete conceptual framing of chaos, fractals, multifractals, and QML in this project, read:
+
+```text
+research/CHAOS_FRACTALS_QML.md
+```
 
 ## 2. Source policy
 
@@ -109,7 +116,20 @@ Before accepting a physics result, check:
 
 Do not call stochastic shower development "chaos" without a mathematically justified dynamical-systems definition.
 
-## 7. Multifractal research rules
+## 7. Chaos / fractal / multifractal boundary
+
+For this project:
+
+- fractal and multifractal shower structure is an active hypothesis;
+- deterministic chaos is not an established property of AMS ECAL shower development;
+- visual irregularity, branching, or fractal-looking geometry is not sufficient evidence of chaos;
+- Lyapunov exponents or attractor language require an explicitly defined dynamical system;
+- the term "effective multifractal" should be preferred over ideal-fractal language when discussing finite detector resolution;
+- finite-size / finite-resolution bias must be quantified before interpreting dimensions physically.
+
+Chaos theory may later provide mathematical tools or motivate separate neural-dynamics / quantum-chaos research, but it must not be inserted into AMS claims without a precise model.
+
+## 8. Multifractal research rules
 
 For shower multifractality:
 
@@ -123,7 +143,7 @@ For shower multifractality:
 
 The first core hypothesis should be tested before constructing a specialized neural architecture around it.
 
-## 8. ML / QML comparison rules
+## 9. ML / QML comparison rules
 
 - Classical and quantum models must receive comparable information.
 - Report strong classical baselines.
@@ -135,7 +155,17 @@ The first core hypothesis should be tested before constructing a specialized neu
 - For QML, record qubit count, encoding, circuit depth, shots, optimizer, and simulator/hardware details.
 - Any claimed advantage must identify the resource or inductive-bias mechanism being tested.
 
-## 9. Code / notebook boundary
+Specific candidate QML ideas currently allowed as hypotheses include:
+
+1. compact multifractal observables as a physically motivated low-dimensional quantum input;
+2. QCNN-style hierarchical pooling as a possible multiscale inductive bias;
+3. scale-structured Hamiltonian / coupling maps based on detector topology.
+
+These are hypotheses to compare against matched classical controls, not assumed benefits.
+
+Quantum chaos / quantum reservoir computing is a separate later-stage research branch and is not required for the first AMS multifractal study.
+
+## 10. Code / notebook boundary
 
 Reusable scientific methods belong in:
 
@@ -159,12 +189,13 @@ Jupyter notebooks should:
 
 A notebook should not be the only implementation of a reusable numerical method.
 
-## 10. AI collaboration rules
+## 11. AI collaboration rules
 
 Claude and Codex should:
 
 - read `research/STATE.md` before substantial work;
 - read this protocol before proposing scientific conclusions;
+- read `research/CHAOS_FRACTALS_QML.md` when working on multiscale, fractal, chaos, neural-architecture, or QML questions;
 - use installed Scientific Research OS skills when appropriate;
 - state assumptions before implementation;
 - leave final interpretation to the human researcher;
@@ -173,7 +204,7 @@ Claude and Codex should:
 
 For independent review, prefer a separate subagent/context from the authoring agent.
 
-## 11. Research state updates
+## 12. Research state updates
 
 `research/STATE.md` is the shared current-state summary.
 
