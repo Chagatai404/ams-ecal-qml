@@ -12,6 +12,7 @@ from ams_ecal.fastmc_config import (
     EXPECTED_FASTMC_SCHEMA_VERSION,
     FastMCConfig,
     FastMCConfigError,
+    LateralEMConfig,
     LongitudinalEMConfig,
     load_fastmc_config,
 )
@@ -28,6 +29,10 @@ from ams_ecal.geometry import (
     SamplingStructure,
     load_geometry,
 )
+from ams_ecal.lateral import (
+    CALIBRATION_ENERGY_RANGE_MEV,
+    AMSLateralShowerModel,
+)
 from ams_ecal.longitudinal import (
     AMSLongitudinalGammaModel,
     ElectromagneticParticleType,
@@ -41,8 +46,10 @@ from ams_ecal.readout import (
 from ams_ecal.tracking import TrackState, project_track_to_z
 
 __all__ = [
+    "CALIBRATION_ENERGY_RANGE_MEV",
     "EVENT_SCHEMA_VERSION",
     "EXPECTED_FASTMC_SCHEMA_VERSION",
+    "AMSLateralShowerModel",
     "AMSLongitudinalGammaModel",
     "AbsorberMaterial",
     "ActiveVolume",
@@ -56,6 +63,7 @@ __all__ = [
     "FastMCConfigError",
     "FiberAxis",
     "GeometryConfigError",
+    "LateralEMConfig",
     "LongitudinalEMConfig",
     "MaterialDepth",
     "MaterialProperties",

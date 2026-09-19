@@ -200,6 +200,7 @@ def test_derives_detector_cross_checks() -> None:
 
     assert geometry.mean_readout_slice_thickness_mm == pytest.approx(9.25)
     assert geometry.mean_readout_slice_thickness_x0 == pytest.approx(17 / 18)
+    assert geometry.nominal_moliere_radius_mm == pytest.approx(18.0)
 
     assert len(geometry.uniform_layer_centers_z_mm) == 18
     assert geometry.uniform_layer_centers_z_mm[0] == pytest.approx(4.625)

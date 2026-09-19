@@ -12,7 +12,7 @@ from pathlib import Path
 
 import yaml
 
-EXPECTED_FASTMC_SCHEMA_VERSION = 1
+EXPECTED_FASTMC_SCHEMA_VERSION = 2
 
 
 class FastMCConfigError(ValueError):
@@ -60,16 +60,57 @@ class LongitudinalEMConfig:
 
 
 @dataclass(frozen=True, slots=True)
+class LateralEMConfig:
+    """Scientific parameters for the mean electromagnetic lateral profile.
+
+    The parameters reproduce the AMS test-beam relation
+
+    ``R_layer = (p0 * ln(E / E_unit) + p1) * layer_index**2 + B``.
+
+    ``R_layer`` is expressed in calibration-cell units.  The calibration paper
+    describes one such cell as approximately half a Moliere radius, which is
+    recorded explicitly by ``calibration_cell_moliere_fraction``.
+    """
+
+    scale_log_slope: float
+    scale_log_intercept: float
+    entrance_scale_cells: float
+    calibration_cell_moliere_fraction: float
+    calibration_energy_unit_mev: float
+
+    def __post_init__(self) -> None:
+        _validate_finite_real(self.scale_log_slope, "scale_log_slope")
+        _validate_finite_real(
+            self.scale_log_intercept,
+            "scale_log_intercept",
+        )
+        _validate_positive_real(
+            self.entrance_scale_cells,
+            "entrance_scale_cells",
+        )
+        _validate_positive_real(
+            self.calibration_cell_moliere_fraction,
+            "calibration_cell_moliere_fraction",
+        )
+        _validate_positive_real(
+            self.calibration_energy_unit_mev,
+            "calibration_energy_unit_mev",
+        )
+
+
+@dataclass(frozen=True, slots=True)
 class FastMCConfig:
     """Top-level configuration for the implemented FastMC components."""
 
     longitudinal_em: LongitudinalEMConfig
+    lateral_em: LateralEMConfig
 
     def __post_init__(self) -> None:
         if not isinstance(self.longitudinal_em, LongitudinalEMConfig):
-            raise TypeError(
-                "longitudinal_em must be a LongitudinalEMConfig"
-            )
+            raise TypeError("longitudinal_em must be a LongitudinalEMConfig")
+
+        if not isinstance(self.lateral_em, LateralEMConfig):
+            raise TypeError("lateral_em must be a LateralEMConfig")
 
 
 def _require_mapping(value: object, context: str) -> Mapping[object, object]:
@@ -97,9 +138,7 @@ def _require_exact_keys(
         problems.append(f"missing keys: {sorted(missing_keys)}")
 
     if unexpected_keys:
-        problems.append(
-            f"unexpected keys: {sorted(map(str, unexpected_keys))}"
-        )
+        problems.append(f"unexpected keys: {sorted(map(str, unexpected_keys))}")
 
     if problems:
         raise FastMCConfigError(f"{context} has " + "; ".join(problems))
@@ -123,7 +162,7 @@ def load_fastmc_config(config_path: str | Path) -> FastMCConfig:
     config = _require_mapping(raw_config, "FastMC configuration root")
     _require_exact_keys(
         config,
-        {"schema_version", "longitudinal_em"},
+        {"schema_version", "longitudinal_em", "lateral_em"},
         "FastMC configuration root",
     )
 
@@ -148,11 +187,34 @@ def load_fastmc_config(config_path: str | Path) -> FastMCConfig:
         "longitudinal_em",
     )
 
+    lateral_em = _require_mapping(
+        config["lateral_em"],
+        "lateral_em",
+    )
+    _require_exact_keys(
+        lateral_em,
+        {
+            "scale_log_slope",
+            "scale_log_intercept",
+            "entrance_scale_cells",
+            "calibration_cell_moliere_fraction",
+            "calibration_energy_unit_mev",
+        },
+        "lateral_em",
+    )
+
     return FastMCConfig(
         longitudinal_em=LongitudinalEMConfig(
             gamma_rate=longitudinal_em["gamma_rate"],
-            shower_max_offset_x0=longitudinal_em[
-                "shower_max_offset_x0"
+            shower_max_offset_x0=longitudinal_em["shower_max_offset_x0"],
+        ),
+        lateral_em=LateralEMConfig(
+            scale_log_slope=lateral_em["scale_log_slope"],
+            scale_log_intercept=lateral_em["scale_log_intercept"],
+            entrance_scale_cells=lateral_em["entrance_scale_cells"],
+            calibration_cell_moliere_fraction=lateral_em[
+                "calibration_cell_moliere_fraction"
             ],
-        )
+            calibration_energy_unit_mev=lateral_em["calibration_energy_unit_mev"],
+        ),
     )

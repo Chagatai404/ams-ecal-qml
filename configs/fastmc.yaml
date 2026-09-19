@@ -1,4 +1,4 @@
-schema_version: 1
+schema_version: 2
 
 longitudinal_em:
   # AMS finds a constant beta = 0.65 for its detector-specific
@@ -14,3 +14,18 @@ longitudinal_em:
   # critical energy is a geometry/material property and is therefore read
   # from configs/geometry.yaml rather than duplicated here.
   shower_max_offset_x0: -0.5
+
+lateral_em:
+  # AMS test-beam parametrization of the layer-dependent lateral scale:
+  #
+  #   R_layer [calibration cells] = A(E) * layer_index^2 + B
+  #   A(E) = p0 * ln(E / 1 GeV) + p1
+  #
+  # The repository maps l to its zero-based layer index. The calibration paper
+  # describes one cell as approximately half a Moliere radius. Its quoted
+  # 3--180 GeV range is documented by the model; use above it is extrapolation.
+  scale_log_slope: -0.000690
+  scale_log_intercept: 0.00660
+  entrance_scale_cells: 0.176
+  calibration_cell_moliere_fraction: 0.5
+  calibration_energy_unit_mev: 1000.0
