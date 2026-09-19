@@ -6,6 +6,24 @@ _Last human review: 2026-09-20_
 
 Can multiscale and multifractal representations of AMS-02 ECAL showers expose physically meaningful differences between electromagnetic showers and proton-induced hadronic showers, and can those representations improve classical or quantum particle classification?
 
+## Conceptual research framing
+
+The current research direction grew out of a broader investigation of chaos theory, fractal geometry, criticality, and quantum machine learning.
+
+The key project distinction is:
+
+- **Fractal / multifractal structure:** directly relevant active AMS hypothesis.
+- **Deterministic chaos:** adjacent mathematical research area, not currently a claim about shower dynamics.
+- **QML:** computational method that may later exploit a validated multiscale representation; not evidence that the physical hypothesis is true.
+
+The detailed framing and long-term research tree are recorded in:
+
+```text
+research/CHAOS_FRACTALS_QML.md
+```
+
+The project must not infer chaos merely from branching, irregularity, or visual complexity.
+
 ## Immediate research question
 
 **RQ-001**
@@ -40,35 +58,119 @@ Related calorimeter literature supports studying fractal or multiscale shower ob
 
 ## Current development state
 
-Completed foundation notebooks:
+**Stage II FastMC Blocks 0–5 are complete on `main`.**
+
+The repository now contains:
+
+- detector/calorimetry foundation;
+- tracker projection and alternating ECAL readout mapping;
+- canonical `ECALEvent` representation;
+- geometry-fidelity validation;
+- deterministic mean longitudinal electromagnetic shower model;
+- deterministic mean lateral electromagnetic shower model;
+- finite-depth longitudinal leakage;
+- finite-width measured-coordinate lateral leakage;
+- tracker-centered deterministic `18 × 72` lateral-fraction representation.
+
+Current FastMC notebooks include:
 
 - `00_ecal_calorimetry_and_geometry.ipynb`
 - `01_tracker_state_and_projection.ipynb`
 - `02_readout_orientation_and_cell_mapping.ipynb`
 - `03_canonical_event_model.ipynb`
 - `04_ecal_geometry_fidelity.ipynb`
+- `05_longitudinal_em_shower.ipynb`
+- `06_lateral_em_shower.ipynb`
 
-The next research notebook should be hypothesis-driven rather than another generic implementation block.
+The latest FastMC work was merged to `main` on 2026-09-20.
 
-Candidate next notebook:
+### Next engineering target
+
+**Block 6 — stochastic event generation**
+
+The immediate engineering problem is to introduce physically meaningful event-to-event shower fluctuations with reproducible random-number control while preserving the validated deterministic mean longitudinal and lateral behavior.
+
+Before implementation, the physics of the fluctuation model must be understood and sourced.
+
+Key Block-6 questions include:
+
+- Which shower quantities should fluctuate event-to-event?
+- Which fluctuations are correlated rather than independent?
+- How should generated ensembles recover the deterministic mean models?
+- What stochastic approximations are defensible for electrons/positrons?
+- What phenomenological approximations, if any, are defensible for proton-event diversity without pretending to be full hadronic transport?
+- Where should RNG ownership, seeds, and stochastic configuration live in the software architecture?
+- Which invariants must remain true for every generated event?
+
+Detector response/digitization remains Block 7, and validated FastMC dataset generation remains Block 8.
+
+## Parallel learning / research track — multifractal shower structure
+
+The multifractal direction remains active, but it does **not** replace the FastMC sequence.
+
+The intended parallel progression is:
 
 ```text
-notebooks/05_shower_multifractal_characterization.ipynb
+FastMC foundation                  Multifractal learning
+-----------------                  ----------------------
+Block 6 stochastic events          scaling laws
+Block 7 detector response          box-counting dimension
+Block 8 validated datasets         D0, D1, D2
+                                   Z_q(epsilon), tau(q)
+                                   f(alpha)
+                                   lacunarity
+                                   finite-resolution bias
+              \                    /
+               \                  /
+                controlled multifractal study
 ```
 
-Reusable estimators should live in source code, e.g.:
+Do not implement specialized multifractal estimators or neural architectures merely because the hypothesis is interesting. First learn and verify the mathematics, then define and validate estimators on controlled cases.
+
+## Broader chaos / fractal learning track
+
+A longer learning roadmap is kept because it may later support other research directions:
 
 ```text
-src/ams_ecal/multifractal.py
+logistic map
+→ bifurcations
+→ Lyapunov exponents
+→ Sharkovskii / Li–Yorke chaos
+→ Hausdorff and generalized fractal dimensions
+→ strange attractors
+→ ergodic theory
+→ spatiotemporal chaos
+→ quantum chaos
 ```
 
-with tests in:
+For the immediate AMS study, the relevant subset is:
 
 ```text
-tests/test_multifractal.py
+scaling laws
+→ fractal dimension
+→ generalized dimensions
+→ multifractals
+→ finite-resolution estimation
+→ multiscale representation learning
 ```
+
+Chaos diagnostics are not a prerequisite for the first AMS multifractal experiment.
 
 ## Immediate learning dependencies
+
+### For Block 6
+
+Before approving the stochastic generator design, the researcher should understand:
+
+1. expectation versus an individual random realization;
+2. variance and covariance;
+3. independent versus correlated fluctuations;
+4. probability distributions used for positive / constrained quantities;
+5. reproducible pseudorandom-number generation and seed ownership;
+6. how a stochastic model should reproduce a validated deterministic mean;
+7. what shower fluctuations are physically motivated by calorimeter literature.
+
+### For the multifractal track
 
 Before interpreting multifractal results, the researcher should be able to explain and reconstruct:
 
@@ -83,9 +185,11 @@ Before interpreting multifractal results, the researcher should be able to expla
 9. lacunarity;
 10. finite-size / finite-resolution bias.
 
-## Planned first experiment
+## Planned first multifractal experiment
 
 **EXP-001 — controlled FastMC multifractal baseline**
+
+This experiment is planned for after the event generator and dataset path are sufficiently validated to produce meaningful event populations.
 
 Goal:
 
@@ -120,6 +224,24 @@ multifractal hypothesis
 
 No quantum advantage is assumed.
 
+### Candidate QML mechanisms
+
+These are research hypotheses, not accepted design choices:
+
+1. **Compact multifractal quantum input**
+   - use validated multiscale observables as a principled low-dimensional representation for VQC / quantum-kernel experiments.
+
+2. **QCNN as a multiscale inductive bias**
+   - test whether hierarchical convolution/pooling is useful for scale-dependent shower information;
+   - compare against matched classical hierarchical controls.
+
+3. **Scale-structured Hamiltonian embedding**
+   - revisit geometry-based couplings with local/intermediate/global interaction scales rather than arbitrary circuit connectivity.
+
+4. **Quantum chaos / quantum reservoir computing**
+   - maintain as a separate future direction;
+   - do not mix into the initial AMS multifractal study without a clear independent research question.
+
 ## Candidate later hypotheses
 
 - Multifractal observables contain particle-ID information conditional on conventional shower variables.
@@ -135,8 +257,22 @@ These remain candidate ideas until separately promoted to hypotheses.
 - Software design should keep detector/model constants configurable so updated values can be substituted without redesign.
 - Reusable physics/numerical logic belongs in tested source code rather than notebook-only cells.
 - Learning and comprehension are part of the research workflow, not a separate afterthought.
+- Claude is primarily the conceptual/tutoring/literature partner.
+- Codex is primarily the implementation/reproducibility partner.
+- Claude and Codex should not perform substantial writes in the same worktree at the same time.
+- The human researcher is the convergence point and decides what is accepted or merged.
+- Fractal/multifractal structure may be tested directly; deterministic chaos may not be claimed without an explicitly defined dynamical system and valid diagnostic.
 
 ## Open scientific questions
+
+### Block 6
+
+- What stochastic shower fluctuations are required for a useful FastMC baseline?
+- Which fluctuations must be correlated across depth or transverse structure?
+- How should stochastic events be validated against the deterministic mean model?
+- Which proton fluctuations can be modeled phenomenologically without overstating physical fidelity?
+
+### Multifractal direction
 
 - Is the AMS ECAL scale range large enough for stable multifractal estimation?
 - Which \(q\) values are numerically meaningful at AMS granularity?
@@ -145,8 +281,35 @@ These remain candidate ideas until separately promoted to hypotheses.
 - Should scaling be measured globally, per view, per depth window, or all three?
 - How large is finite-resolution bias?
 - Do multifractal observables add information beyond shower width, depth, and energy concentration?
+- Can a learnable multiscale representation outperform fixed multifractal summaries without merely relearning conventional shower width/depth?
 - What is the correct fair baseline for a later quantum model?
+
+### Chaos / complex-systems direction
+
+- Is there any mathematically justified dynamical-system formulation of shower development that would make chaos diagnostics meaningful?
+- Which tools from nonlinear dynamics are useful without claiming deterministic chaos?
+- Should quantum-chaotic / reservoir-computing ideas remain a separate project rather than an AMS classifier component?
+
+## Next session — start here
+
+1. Open an Obsidian Tutor Session:
+   **“AMS FastMC Block 6 — Stochastic Shower Generation.”**
+2. Ask Claude to use the Scientific Research OS `tutor` skill:
+   - probe prerequisite understanding;
+   - build a dependency map;
+   - use authoritative sources;
+   - teach the physics of shower-to-shower fluctuations before implementation.
+3. In parallel, ask Codex to inspect the current FastMC architecture **without implementing new physics** and report:
+   - existing interfaces to preserve;
+   - likely RNG ownership;
+   - configuration boundaries;
+   - invariants/tests;
+   - assumptions that require physics approval.
+4. Continue the multifractal learning track in separate Obsidian tutoring sessions.
+5. Converge the physics and software reports.
+6. Human approves the stochastic model and experiment contract.
+7. Only then begin Block-6 implementation.
 
 ## Next human decision
 
-Approve the mathematical definition and estimator design for the first multifractal observables before implementation.
+Approve the physically justified stochastic variables/distributions and their software boundary before Codex implements Block 6.
