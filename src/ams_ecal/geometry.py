@@ -535,6 +535,18 @@ class ECALGeometry:
         return self.total_depth_x0 / self.number_of_layers
 
     @property
+    def nominal_moliere_radius_mm(self) -> float:
+        """Return the segmentation-based nominal ECAL Moliere radius.
+
+        AMS documentation describes one transverse readout cell as
+        approximately half a Moliere radius. The ideal geometry therefore
+        derives the nominal lateral scale from the configured cell pitch
+        instead of storing a second, potentially inconsistent constant.
+        """
+
+        return 2.0 * self.cell_pitch_mm
+
+    @property
     def uniform_layer_centers_z_mm(self) -> tuple[float, ...]:
         """Return centers of the 18 idealized uniform readout slices."""
 
