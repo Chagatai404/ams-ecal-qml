@@ -257,9 +257,11 @@ These remain candidate ideas until separately promoted to hypotheses.
 - Software design should keep detector/model constants configurable so updated values can be substituted without redesign.
 - Reusable physics/numerical logic belongs in tested source code rather than notebook-only cells.
 - Learning and comprehension are part of the research workflow, not a separate afterthought.
-- Claude is primarily the conceptual/tutoring/literature partner.
-- Codex is primarily the implementation/reproducibility partner.
-- Claude and Codex should not perform substantial writes in the same worktree at the same time.
+- AI providers have no fixed project roles; the human researcher assigns the task role for each session.
+- For substantial work, prefer one primary agent at a time; use another agent later for independent verification, reproduction, or review when useful.
+- Multiple agents should not perform substantial writes in the same worktree at the same time.
+- Hypothesis-sensitive literature discovery should be performed independently of implementation assumptions before repository reconciliation.
+- Cross-validation means independent reconstruction, verification, or reproduction rather than agreement checking.
 - The human researcher is the convergence point and decides what is accepted or merged.
 - Fractal/multifractal structure may be tested directly; deterministic chaos may not be claimed without an explicitly defined dynamical system and valid diagnostic.
 
@@ -294,22 +296,18 @@ These remain candidate ideas until separately promoted to hypotheses.
 
 1. Open an Obsidian Tutor Session:
    **“AMS FastMC Block 6 — Stochastic Shower Generation.”**
-2. Ask Claude to use the Scientific Research OS `tutor` skill:
+2. Assign one primary agent to run the Scientific Research OS learning workflow:
    - probe prerequisite understanding;
    - build a dependency map;
-   - use authoritative sources;
+   - test current project knowledge across physics, mathematics/statistics, and software conventions;
    - teach the physics of shower-to-shower fluctuations before implementation.
-3. In parallel, ask Codex to inspect the current FastMC architecture **without implementing new physics** and report:
-   - existing interfaces to preserve;
-   - likely RNG ownership;
-   - configuration boundaries;
-   - invariants/tests;
-   - assumptions that require physics approval.
-4. Continue the multifractal learning track in separate Obsidian tutoring sessions.
-5. Converge the physics and software reports.
-6. Human approves the stochastic model and experiment contract.
-7. Only then begin Block-6 implementation.
+3. When external literature becomes necessary, use a fresh isolated literature-scout context for the independent discovery pass so repository assumptions do not seed the search.
+4. Independently verify implementation-affecting scientific claims before reconciling the literature with the existing FastMC.
+5. If useful after the physical model is understood, assign a second agent to inspect or reproduce the software architecture independently, without preloading the first agent's reasoning.
+6. Continue the multifractal learning track in separate Obsidian tutoring sessions without allowing it to derail the FastMC foundation.
+7. Human approves the stochastic model and experiment contract.
+8. Only then begin Block-6 implementation.
 
 ## Next human decision
 
-Approve the physically justified stochastic variables/distributions and their software boundary before Codex implements Block 6.
+Approve the physically justified stochastic variables/distributions and their software boundary before Block 6 implementation begins.
