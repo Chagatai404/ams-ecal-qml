@@ -86,7 +86,8 @@ The latest FastMC work was merged to `main` on 2026-09-20.
 
 ### Next engineering target
 
-**Block 6 — stochastic event generation**
+**Block 6A — stochastic electromagnetic event generation** (6B, proton phenomenology, is a separate
+later design problem and must not be mixed into the first electromagnetic patch)
 
 The immediate engineering problem is to introduce physically meaningful event-to-event shower fluctuations with reproducible random-number control while preserving the validated deterministic mean longitudinal and lateral behavior.
 
@@ -341,6 +342,65 @@ Sampling Calorimeters" and tutor session "AMS FastMC Block 6"._
 
   Until a Tier 3 reference exists, entry-anchored remains the baseline and first-bremsstrahlung
   remains an architecturally supported alternative.
+
+### ACCEPTED — Block 6A electromagnetic stochastic model (2026-09-21)
+
+Accepted by the human researcher after four evidence passes. Implementation begins 2026-09-22.
+
+**The model.** For each event, at fixed `beta = 0.65`:
+
+```text
+T_bar(E) = ln(E / E_c) - 0.5                       mean shower maximum, X_0
+s(E)     = 1 / (-2.5 + 1.25 * ln(E / E_c))         lognormal width of ln(T0)
+mu(E)    = ln(T_bar(E)) - 0.5 * s(E)^2             centering so E[T0] = T_bar(E)
+ln(T0)   ~ Normal(mu(E), s(E)^2)
+alpha_ev = 1 + 0.65 * T0
+```
+
+then integrate the existing gamma profile over the 18 finite depth intervals, and distribute each
+stochastic layer energy with the **existing deterministic** lateral cell fractions around the
+projected track.
+
+**Explicitly excluded from 6A:** fluctuating beta; an explicit shower-start variable; a two-variable
+correlated (T, alpha) model; any new lateral fluctuation model; microscopic transport; any attempt
+to uniquely identify hidden physical variance components.
+
+**Provenance of the width law — transferred approximation.** Verified verbatim in Grindhammer &
+Peters, Appendix A.2.3 "Fluctuated longitudinal profiles", sampling-calorimeter variant. Three
+qualifications recorded deliberately:
+
+1. The same equation line also publishes `sigma(ln alpha_sam) = 1/(-0.82 + 0.79 ln y)` and
+   `rho(ln T, ln alpha) = 0.784 - 0.023 ln y`. Fixing beta drops that second degree of freedom.
+2. **Quantified consequence:** because alpha is fully determined by T0, we generate about **61% of
+   the published shape-parameter spread**, near-constant in energy, with correlation forced to 1
+   where the reference has rho ~ 0.51-0.62. Accepted because b = 0.65 is AMS's own detector-specific
+   measurement, and therefore better evidence for this calorimeter than a generic sampling law.
+   Recorded as a known deviation for later Geant4 comparison, not an unnoticed one.
+3. **Origin-convention transfer:** Grindhammer anchors T at first bremsstrahlung; we anchor at
+   detector entry. Entry-anchored T0 additionally contains first-interaction-depth spread, so this
+   width most likely *underestimates* ours. Magnitude unknown. The F_S sampling corrections in that
+   appendix apply to the means, not to sigma, so the width transfers more cleanly than the mean.
+
+**External sanity check, AMS test beam at ~250 GeV** — a check, never a calibration target, because
+the reported values include reconstruction and detector effects:
+
+| | model | reported | difference |
+|---|---|---|---|
+| RMS shower maximum | 0.945 X_0 | 0.9669 X_0 | -0.022 (about 2%) |
+| mean shower maximum | 9.901 X_0 | 8.851 X_0 | +1.05 |
+
+The mean offset is in a physically expected direction: Grindhammer section 3.3 states the signal
+maximum in a sampling calorimeter occurs *earlier* than in a homogeneous calorimeter of the same
+effective material, because e/mip falls with depth, while our T_bar comes from the PDG
+homogeneous-style relation. Recorded as a documented ~1 X_0 offset relevant to Block 7 and to
+early-layer comparisons.
+
+**Acceptance philosophy for 6A.** A mixture of stochastic gamma profiles need not reproduce the
+deterministic Block-4 profile point by point. The checks that matter are reproducibility;
+positivity; sensible shower diversity; correct mean scale; realistic longitudinal spread; coherent
+layer-to-layer correlation; leakage remaining explicit; no simulator artifacts or label leakage;
+rough consistency with known AMS/test-beam quantities; and eventual Geant4 comparison. The
+identifiability and latent-variable-recovery tests explored earlier are **not** 6A blockers.
 
 ### Provisional decision — pending literature
 
