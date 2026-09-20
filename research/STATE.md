@@ -289,7 +289,22 @@ Sampling Calorimeters" and tutor session "AMS FastMC Block 6"._
 - The definition of shower origin is a genuine modelling degree of freedom - existing fast-simulation
   implementations differ, anchoring either at first bremsstrahlung or at calorimeter entry.
 - The gamma form is documented to fail in roughly the first two radiation lengths, and that region
-  was excluded when the parameterization was fitted (PDG 2025 p. 28, verbatim).
+  was excluded when the parameterization was fitted (PDG 2025 p. 28, verbatim). AMS cites the PDG
+  for the functional form itself, so the caveat attaches to the same form AMS adopted; whether AMS
+  excluded that region when determining b is unknown.
+- **`gamma_rate: 0.65` has peer-reviewed provenance.** M. Aguilar et al., Physics Reports 894 (2021)
+  1-116, section 1.7.1: "In the AMS ECAL, we found that the scale parameter b is constant
+  (b = 0.65)." Primary reconstruction source: A. Kounine, Z. Weng, W. Xu, C. Zhang, NIM A 869 (2017)
+  110-117, DOI 10.1016/j.nima.2017.07.013 - exact locator not yet extracted.
+- **The published AMS longitudinal form is algebraically identical to our implementation.** AMS
+  Eq. (2) has exponent bT0, giving alpha = 1 + b*T0 and normalization Gamma(bT0 + 1), which is
+  exactly `AMSLongitudinalGammaModel.shape_parameter`. Our construction is the published form, not
+  an approximation of it.
+- **AMS fits T0 per individual shower; we predict it from energy.** AMS obtains E0 and T0 from a fit
+  to observed depositions per shower. That AMS treats T0 as a free per-shower parameter is direct
+  evidence that T0 varies event to event, which is the Block 6 quantity; the distribution of fitted
+  T0 at fixed energy is an empirical target for the stochastic model. Our predicted-T approach is a
+  forward-generation choice and should not be conflated with the AMS reconstruction procedure.
 
 ### Not established — deliberately not modelled as physics
 
@@ -309,18 +324,32 @@ Sampling Calorimeters" and tutor session "AMS FastMC Block 6"._
   public `ECALEvent` schema.
 - First-interaction-relative generation is activated only when justified by an AMS-specific source
   or by our own Geant4 reference simulation, without restructuring the simulator.
-- **Graduation criterion:** an explicit ablation at FastMC-Geant4 validation, entry-anchored
-  stochastic profile versus explicit start plus intrinsic profile, compared on the 18-layer
-  covariance matrix, the fitted T_0 distribution, first 2-3 layer energy distributions, early-layer
-  occupancy, longitudinal leakage, and event-level layer-to-layer correlations. Adopted only if it
-  materially improves these **without double counting**.
+- **Graduation criterion (amended 2026-09-21, three tiers, passed in order).** An adversarial review
+  showed the original single-ablation form was symmetric between the two candidates and could not
+  discriminate them.
+  1. **Internal stochastic consistency** - ensemble mean, containment, 18-layer covariance, T_0
+     distribution, early-layer occupancy and longitudinal leakage reproduce the chosen reference
+     parameterization. Necessary, but symmetric between candidates, so it discriminates nothing.
+  2. **Identifiability stress test** - across several widely separated energies, cross-fit each
+     generator against the synthetic data of the other under shared energy-scaling laws and
+     determine which observables, if any, discriminate them. If none do, the ablation cannot choose,
+     and that is itself the result.
+  3. **Physical graduation** - an explicit start-depth degree of freedom becomes the preferred
+     physical model only once an asymmetric external reference (event-level Geant4 truth, suitable
+     test-beam information, or equivalent) shows it improves the *conditional structure* rather than
+     merely *repartitioning variance*.
+
+  Until a Tier 3 reference exists, entry-anchored remains the baseline and first-bremsstrahlung
+  remains an architecturally supported alternative.
 
 ### Provisional decision — pending literature
 
 - Sampling fluctuation belongs to **Block 7**, not Block 6: the cascade develops through the whole
   lead + fibre composite and does not know which material is instrumented, so energy deposited in
-  passive lead is shower physics while reading out only the fibres is a construction choice. Held as
-  provisional because it interacts with the unresolved `gamma_rate` provenance question above.
+  passive lead is shower physics while reading out only the fibres is a construction choice. Still
+  **provisional**, and the reason is now sharper rather than resolved: because AMS fits b to observed
+  depositions, some detector behaviour is already inside Blocks 4-5, so a Block 7 sampling model
+  risks double-counting it. The boundary is right in principle; the partition is not yet quantified.
 
 ## Open scientific questions
 
@@ -341,11 +370,11 @@ Still open:
 - Which transverse fluctuations must be correlated, and with what longitudinal coupling? The
   literature reports no first-principles theory for transverse-longitudinal coupling.
 - Which proton fluctuations can be modeled phenomenologically without overstating physical fidelity?
-- **Provenance of `gamma_rate: 0.65`.** No peer-reviewed source has been located; the only citation
-  is a non-peer-reviewed AMS web page. It is now the only unpinned parameter in the longitudinal
-  model. Critically, it is unknown whether that fit was made against *true* energy deposition or
-  against *reconstructed* profiles - which also determines whether a separate Block 7 sampling model
-  would double-count detector behaviour already absorbed into Blocks 4-5.
+- **How much detector behaviour is already absorbed into `gamma_rate: 0.65`?** Provenance is now
+  settled (see Accepted evidence). The live question is quantitative: AMS fits the individual shower
+  parameters to *observed* cell depositions, so b characterizes measured shower shape rather than
+  true deposition in the composite. How much a later Block 7 response model would double-count is
+  unquantified. Needs the Kounine primary paper and ultimately a numerical check.
 - Whether the documented failure of the gamma form in roughly the first two radiation lengths - about
   the first two readout layers here - applies to the AMS fit. `layer_energy_fractions` currently
   integrates from t = 0 through that region.
