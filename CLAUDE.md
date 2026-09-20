@@ -16,36 +16,49 @@ Before substantial work:
 The human researcher is the principal investigator and learner.
 
 Do not silently convert:
+
 - an analogy into a mechanism,
 - a hypothesis into a fact,
 - an AI explanation into the user's permanent understanding,
 - an exploratory result into an accepted conclusion.
 
-## Default Claude role
+## Role assignment
 
-Claude is primarily the conceptual/research-learning partner:
+Do not assume that Claude has a fixed role in this project.
 
-- tutor from first principles,
-- help reconstruct derivations,
-- search and interpret legitimate scientific sources,
-- distinguish claims from evidence,
-- form falsifiable hypotheses,
-- critique physical meaning,
-- propose experimental designs,
-- challenge interpretations.
+The human researcher assigns the task role for each session.
 
-When teaching, prioritize understanding over producing code quickly.
+Claude may be asked to perform any compatible research task, including:
 
-When a formula or method is central, motivate and derive it rather than asking the user to trust it.
+- tutoring,
+- physics or mathematics explanation,
+- derivation,
+- literature discovery,
+- source verification,
+- hypothesis formation,
+- experiment design,
+- scientific coding,
+- test writing,
+- numerical experiments,
+- statistical review,
+- physics review,
+- reproducibility review,
+- adversarial review.
+
+Do not infer that another provider, including Codex, has a complementary or predefined role.
+
+Provider identity does not determine scientific responsibility.
 
 ## Agent handoff model
 
-Claude and Codex are not simultaneous co-authors by default.
+For substantial work, prefer one primary agent at a time.
 
-For substantial work:
+A typical workflow is:
 
 ```text
-one agent owns the task
+human defines the task
+        ↓
+one primary agent performs it
         ↓
 human review
         ↓
@@ -54,9 +67,9 @@ second agent independently verifies/reproduces/reviews when useful
 human decision
 ```
 
-When Claude is the primary worker, finish a coherent research/learning unit before asking Codex to review it.
+When Claude is the primary worker, complete a coherent task before handing off.
 
-When Claude is reviewing Codex work, reconstruct the scientific or conceptual justification independently where practical rather than inheriting Codex's reasoning.
+When Claude is acting as a reviewer, reconstruct the scientific, statistical, or implementation justification independently where practical rather than inheriting the first agent's reasoning.
 
 Cross-validation means independent reconstruction, verification, or reproduction. It does not mean agreement checking.
 
@@ -104,19 +117,19 @@ When the Scientific Research OS Obsidian tooling is configured:
 
 ## Branch / worktree policy
 
-Do not perform substantial writes in the same worktree currently being used by Codex.
+Do not perform substantial writes in the same worktree currently being used by another agent.
 
 Separate worktrees are optional for sequential work, but recommended for independent implementations or preserved alternatives.
 
 If used:
 
 ```text
-ams-ecal-qml/          # human integration worktree
-ams-ecal-qml-claude/   # optional Claude worktree
-ams-ecal-qml-codex/    # optional Codex worktree
+ams-ecal-qml/             # human integration worktree
+ams-ecal-qml-agent-a/     # optional agent worktree
+ams-ecal-qml-agent-b/     # optional independent-review worktree
 ```
 
-Claude should not merge its own branch into the human integration branch.
+Do not merge your own branch into the human integration branch unless the human explicitly asks you to do so.
 
 Before handoff, report:
 
@@ -131,6 +144,7 @@ Before handoff, report:
 Use `RESEARCH_PROTOCOL.md`.
 
 For important scientific claims:
+
 - favor primary research and authoritative sources;
 - record exact pages/sections/equations/figures when possible;
 - verify claims that materially affect the implementation;
@@ -140,7 +154,30 @@ For AMS-specific detector facts, prefer official AMS/collaboration sources.
 
 When an important source was found because it already existed in the repository, label it as an inherited project citation rather than presenting it as independently discovered evidence.
 
-## Research order
+## Research workflow
+
+Do not assume a fixed sequence solely from provider identity.
+
+Follow the task-specific workflow chosen by the human researcher and the relevant Scientific Research OS skill.
+
+When learning is part of the task:
+
+1. probe the researcher's current understanding;
+2. identify missing prerequisites;
+3. teach from the deepest missing dependency;
+4. verify understanding through retrieval/reconstruction;
+5. return to the research task only after required gaps are closed.
+
+When literature determines a scientific implementation:
+
+1. formulate a neutral question;
+2. perform independent external discovery;
+3. independently verify implementation-affecting claims;
+4. seek counterevidence and competing models;
+5. reconcile the evidence with the repository;
+6. formulate the scientific model;
+7. obtain human approval;
+8. only then implement.
 
 For the current multifractal direction:
 
@@ -152,8 +189,6 @@ For the current multifractal direction:
 6. quantify uncertainty;
 7. compare with conventional observables;
 8. only then design specialized ML/QML architectures.
-
-Do not skip directly to a neural architecture because the idea sounds plausible.
 
 For Block 6 stochastic FastMC work:
 

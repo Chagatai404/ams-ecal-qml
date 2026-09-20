@@ -23,28 +23,43 @@ The human researcher is the final authority on:
 
 Do not silently promote hypotheses or interpretations into accepted facts.
 
-## Default Codex role
+## Agent role assignment
 
-Codex is primarily the implementation/reproducibility agent:
+Do not assume a fixed role based on whether you are Claude, Codex, ChatGPT, or another compatible tool.
 
-- implement tested scientific utilities,
-- design clean APIs,
-- write and run tests,
-- build reproducible experiments,
-- refactor notebook logic into `src/`,
-- audit numerical edge cases,
-- record exact commands and configurations.
+The human researcher assigns the task role for each session.
 
-Codex may explain scientific reasoning, but should not bypass the learning/research workflow by implementing a method whose assumptions are still unresolved.
+Any capable agent may be asked to:
+
+- tutor,
+- explain physics or mathematics,
+- derive equations,
+- search and study literature,
+- verify sources,
+- form or critique hypotheses,
+- design experiments,
+- implement scientific code,
+- write tests,
+- run numerical experiments,
+- audit statistics,
+- audit physics assumptions,
+- review reproducibility,
+- perform adversarial review.
+
+Provider identity does not determine scientific responsibility.
+
+Project-local instructions may specify the current task, but they must not be interpreted as permanent provider-specific roles.
 
 ## Agent handoff model
 
-Claude and Codex should normally be used **sequentially, not simultaneously**, for substantial research work.
+For substantial work, prefer one primary agent at a time.
 
-Preferred workflow:
+A typical workflow is:
 
 ```text
-one agent owns the task
+human defines the task
+        ↓
+one primary agent performs it
         ↓
 human reviews the output
         ↓
@@ -57,7 +72,7 @@ Do not use the second agent merely to agree with the first.
 
 When cross-validating:
 
-- give the reviewer the artifact, claim, source, test result, or acceptance criteria;
+- give the reviewer the artifact, claim, source, test result, experiment, or acceptance criteria;
 - withhold the first agent's full reasoning when practical;
 - ask the reviewer to reconstruct the conclusion independently;
 - compare conclusions only after the independent pass is complete.
@@ -110,7 +125,7 @@ For a new research experiment, use the `design-experiment` skill when available.
 
 ## Branch / worktree policy
 
-Do not have Claude and Codex perform substantial writes on the same working tree at the same time.
+Do not have multiple agents perform substantial writes on the same working tree at the same time.
 
 Because agents are normally used sequentially, separate worktrees are optional rather than mandatory. Use them when:
 
@@ -122,9 +137,9 @@ Because agents are normally used sequentially, separate worktrees are optional r
 If using separate worktrees, a typical structure is:
 
 ```text
-ams-ecal-qml/          # human integration worktree
-ams-ecal-qml-codex/    # optional Codex worktree
-ams-ecal-qml-claude/   # optional Claude worktree
+ams-ecal-qml/             # human integration worktree
+ams-ecal-qml-agent-a/     # optional agent worktree
+ams-ecal-qml-agent-b/     # optional independent-review worktree
 ```
 
 Agents do not merge their own work into the human integration branch.
@@ -142,6 +157,7 @@ Before handoff, report:
 Notebooks are research records, not utility libraries.
 
 If code is reusable:
+
 - move it into `src/ams_ecal/`;
 - add tests under `tests/`;
 - call it from the notebook.
