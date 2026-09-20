@@ -265,14 +265,90 @@ These remain candidate ideas until separately promoted to hypotheses.
 - The human researcher is the convergence point and decides what is accepted or merged.
 - Fractal/multifractal structure may be tested directly; deterministic chaos may not be claimed without an explicitly defined dynamical system and valid diagnostic.
 
+## Accepted evidence and decisions — Block 6
+
+_Added 2026-09-20 after a learning session, an independent literature-discovery pass, and an
+independent source-verification pass. Full record: Obsidian evidence map "EM Shower Fluctuations in
+Sampling Calorimeters" and tutor session "AMS FastMC Block 6"._
+
+### Externally established in the relevant regime
+
+- The mean longitudinal profile is a gamma distribution whose maximum lies at `(a-1)/b`. Our
+  `alpha = 1 + beta*T` construction is exactly this identity rearranged, so the profile peak sits at
+  the predicted shower maximum by construction. Verified against PDG 2025 Eq. (34.35) and Leroy &
+  Rancoita (2000) Eq. (12).
+- **The shower-maximum offset convention is pinned.** For the *energy-deposition* profile,
+  `C_e = -0.5` and `C_gamma = +0.5`. Both PDG 2025 Eq. (34.36) and Leroy & Rancoita Eqs. (12)-(13)
+  give this. The older `C_e = -1.0`, `C_gamma = -0.5` constants belong to Rossi's Approximation B for
+  the *electron-number* maximum, a different observable, and PDG regards them as superseded. Our
+  `shower_max_offset_x0: -0.5` paired with an energy-deposition gamma profile matches both sources.
+  **Risk to avoid:** mixing an Approximation-B offset with an energy-deposition profile would cost
+  about 0.5 X_0 (~5 mm here), and the two treatments appear in the same paper.
+- Longitudinal shape parameters fluctuate and are **correlated**. A Block 6 generator must reproduce
+  that correlation; independent per-layer draws are physically wrong.
+- The definition of shower origin is a genuine modelling degree of freedom - existing fast-simulation
+  implementations differ, anchoring either at first bremsstrahlung or at calorimeter entry.
+- The gamma form is documented to fail in roughly the first two radiation lengths, and that region
+  was excluded when the parameterization was fitted (PDG 2025 p. 28, verbatim).
+
+### Not established — deliberately not modelled as physics
+
+- That an explicit shower-start fluctuation is *required* for an accurate AMS-02 ECAL FastMC.
+  Entry-anchored modelling demonstrably works, and AMS reconstruction succeeds without an explicit
+  start variable.
+- That shower-start motion is what prevents orthogonalizing the fluctuation sources. No source
+  establishes this for electromagnetic calorimeter showers; **dropped from the evidence base.**
+
+### Accepted decision — Block 6 origin convention
+
+- The first stochastic implementation is **entry-referenced**. `shower_start_depth_x0` is **not**
+  sampled.
+- The architecture must nonetheless be able to represent the alternative: a longitudinal fluctuation
+  model carrying an `origin_convention` of `"detector_entry"` or `"first_bremsstrahlung"`, with
+  `shower_start_depth_x0: float | None` held in **internal generated-shower state**, not in the
+  public `ECALEvent` schema.
+- First-interaction-relative generation is activated only when justified by an AMS-specific source
+  or by our own Geant4 reference simulation, without restructuring the simulator.
+- **Graduation criterion:** an explicit ablation at FastMC-Geant4 validation, entry-anchored
+  stochastic profile versus explicit start plus intrinsic profile, compared on the 18-layer
+  covariance matrix, the fitted T_0 distribution, first 2-3 layer energy distributions, early-layer
+  occupancy, longitudinal leakage, and event-level layer-to-layer correlations. Adopted only if it
+  materially improves these **without double counting**.
+
+### Provisional decision — pending literature
+
+- Sampling fluctuation belongs to **Block 7**, not Block 6: the cascade develops through the whole
+  lead + fibre composite and does not know which material is instrumented, so energy deposited in
+  passive lead is shower physics while reading out only the fibres is a construction choice. Held as
+  provisional because it interacts with the unresolved `gamma_rate` provenance question above.
+
 ## Open scientific questions
 
 ### Block 6
 
-- What stochastic shower fluctuations are required for a useful FastMC baseline?
-- Which fluctuations must be correlated across depth or transverse structure?
-- How should stochastic events be validated against the deterministic mean model?
+Settled during the 2026-09-20 learning and literature session (see Accepted evidence below):
+
+- ~~How should stochastic events be validated against the deterministic mean model?~~ The ensemble
+  average must converge to the validated deterministic profile. Blocks 4-5 become the oracle for
+  Block 6 rather than being replaced by it.
+- ~~Which fluctuations must be correlated across depth?~~ Longitudinal shape parameters fluctuate
+  and are correlated; a generator must reproduce that. Independent per-layer draws are excluded.
+
+Still open:
+
+- What stochastic shower fluctuations are required for a useful FastMC baseline? Specifically, which
+  distributions are defensible for the positive/constrained quantities involved.
+- Which transverse fluctuations must be correlated, and with what longitudinal coupling? The
+  literature reports no first-principles theory for transverse-longitudinal coupling.
 - Which proton fluctuations can be modeled phenomenologically without overstating physical fidelity?
+- **Provenance of `gamma_rate: 0.65`.** No peer-reviewed source has been located; the only citation
+  is a non-peer-reviewed AMS web page. It is now the only unpinned parameter in the longitudinal
+  model. Critically, it is unknown whether that fit was made against *true* energy deposition or
+  against *reconstructed* profiles - which also determines whether a separate Block 7 sampling model
+  would double-count detector behaviour already absorbed into Blocks 4-5.
+- Whether the documented failure of the gamma form in roughly the first two radiation lengths - about
+  the first two readout layers here - applies to the AMS fit. `layer_energy_fractions` currently
+  integrates from t = 0 through that region.
 
 ### Multifractal direction
 
@@ -310,4 +386,8 @@ These remain candidate ideas until separately promoted to hypotheses.
 
 ## Next human decision
 
-Approve the physically justified stochastic variables/distributions and their software boundary before Block 6 implementation begins.
+Approve the physically justified stochastic **variables and distributions** and their software
+boundary before Block 6 implementation begins. The origin convention and the ensemble-recovery
+acceptance test are already decided (see Accepted evidence and decisions). What remains unapproved is
+which quantities fluctuate, under which distribution families for positive/constrained quantities,
+and how the correlation structure is parameterized.
