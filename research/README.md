@@ -1,19 +1,32 @@
 # Research records
 
-This directory contains lightweight, human-approved project state and scientific decision records. It is not a replacement for notebooks, source code, results, or the researcher's Obsidian knowledge vault.
+This directory contains the durable scientific state of the project.
 
-`STATE.md` is the shared current-state summary for the human researcher, Claude, Codex, and specialist agents.
+It is not a replacement for source code, notebooks, results, or the
+researcher's Obsidian knowledge vault.
 
-`CHAOS_FRACTALS_QML.md` preserves the broader conceptual thread connecting:
+## Core records
 
-- stochastic particle cascades;
-- fractal / multifractal shower structure;
-- chaos theory and its limits in this context;
-- multiscale classical ML;
-- QCNN / quantum feature-map hypotheses;
-- separate future quantum-chaos / reservoir-computing ideas.
+`STATE.md`
 
-Agents working on any of those topics should read that framing document before proposing scientific conclusions.
+: The current human-approved project state. Read this before substantial
+scientific work.
+
+`PUBLICATION_ROADMAP.md`
+
+: The accepted multi-paper program. The first paper studies multiscale shower
+information with classical ML; QML is deliberately downstream.
+
+`questions/RQ-001_multiscale_shower_information.md`
+
+: Formal statement of the active first-paper research question, hypotheses,
+confounders, and evidence requirements.
+
+`CHAOS_FRACTALS_QML.md`
+
+: Broader conceptual framing connecting stochastic particle cascades,
+fractal/multifractal ideas, chaos theory and its limits, multiscale ML, and
+future QML hypotheses.
 
 ## Where information belongs
 
@@ -27,37 +40,42 @@ Obsidian
 └── personal synthesis
 
 Git repository
-├── research/STATE.md                    current accepted state
-├── research/CHAOS_FRACTALS_QML.md      conceptual research framing
-├── research/questions/                  formal research questions
-├── research/hypotheses/                 hypotheses under test
-├── research/experiments/                experiment contracts / records
-├── research/decisions/                  accepted research decisions
-├── notebooks/                           scientific exploration / validation
-├── src/                                 reusable implementation
-├── tests/                               numerical/software contracts
-└── configs/                             explicit model/configuration values
+├── research/STATE.md
+├── research/PUBLICATION_ROADMAP.md
+├── research/CHAOS_FRACTALS_QML.md
+├── research/questions/
+├── research/hypotheses/
+├── research/experiments/
+├── research/decisions/
+├── notebooks/
+├── src/
+├── tests/
+└── configs/
 ```
 
-The project should grow these folders only when real records exist; do not create bureaucracy merely to fill a structure.
+The project should create research records only when they serve a real
+scientific purpose.
 
-## Daily research workflow
+---
 
-### 0. Synchronize
+# Daily research workflow
+
+## 0. Synchronize
 
 Before substantial work:
 
 1. read `RESEARCH_PROTOCOL.md`;
 2. read `research/STATE.md`;
-3. when the task involves chaos, fractals, multifractals, multiscale learning, QCNNs, Hamiltonian embedding, or quantum reservoirs, read `research/CHAOS_FRACTALS_QML.md`;
-4. inspect recent Git changes;
-5. correct `STATE.md` if code/research has moved ahead of it.
+3. read `research/PUBLICATION_ROADMAP.md` for publication-level work;
+4. read `research/CHAOS_FRACTALS_QML.md` for fractal, multiscale, chaos, QCNN,
+   Hamiltonian-embedding, or quantum-reservoir work;
+5. inspect recent Git changes;
+6. correct `STATE.md` if code or accepted research decisions have moved ahead
+   of it.
 
-The state file must describe the repository that actually exists.
+## 1. Choose the working mode
 
-### 1. Choose today's mode
-
-State one primary question and choose the working mode:
+Pick one dominant mode:
 
 - learning;
 - literature;
@@ -67,63 +85,63 @@ State one primary question and choose the working mode:
 - analysis;
 - review.
 
-Avoid mixing all modes at once.
+Avoid mixing every mode into one task.
 
-### 2. Learning mode — Obsidian first
+## 2. Learning mode
 
 For concepts that affect scientific decisions:
 
-1. create/open a Tutor Session in Obsidian;
-2. use the Scientific Research OS `tutor` skill;
-3. probe prerequisite understanding;
-4. build a dependency map;
-5. use legitimate sources;
-6. teach one node at a time;
-7. quiz/reconstruct before treating the concept as learned.
+1. open a Tutor Session in Obsidian;
+2. probe prerequisite understanding;
+3. build a dependency map;
+4. teach from legitimate sources;
+5. use retrieval/testing;
+6. promote durable understanding only after the researcher can reconstruct it.
 
-Permanent concept/derivation notes are promoted only after the human can explain the idea in their own words.
+## 3. Scientific gate before code
 
-### 3. Scientific gate before code
+Before implementing a new scientific method, establish:
 
-Before implementing a scientific method, establish:
-
-- scientific purpose;
+- purpose;
 - assumptions;
 - mathematical definition;
 - physical/statistical meaning;
 - units/domain;
 - limiting behavior;
-- validation plan;
-- authoritative sources.
+- source provenance;
+- validation plan.
 
-If these are unresolved, implementation waits.
+Do not reopen already accepted decisions without new evidence.
 
-### 4. Parallel Claude / Codex work
+## 4. Independent evidence workflow
 
-Default division of labor:
+For implementation-defining or hypothesis-sensitive questions:
 
 ```text
-Claude                          Codex
-------                          -----
-tutoring                        implementation boundary
-literature                      APIs / architecture
-derivations                     tests
-hypothesis formation            reproducibility
-physics interpretation          numerical edge cases
+neutral question
+→ independent literature discovery
+→ source verification
+→ counterevidence / adversarial review
+→ repository reconciliation
+→ human decision
 ```
 
-Use separate worktrees/branches for substantial writes.
+Distinguish:
 
-Both agents report back to the human researcher. They do not auto-merge or decide research conclusions.
+- AMS-specific evidence;
+- external result in the relevant regime;
+- transferred approximation;
+- project phenomenological assumption;
+- unresolved question.
 
-### 5. Experiment design
+## 5. Experiment design
 
 Before seeing results, record:
 
 - research question;
-- H1 / H0 or competing explanations;
-- observable prediction;
-- variables and controls;
+- hypotheses / nulls;
+- variables;
+- controls;
 - confounders;
 - metrics;
 - uncertainty/statistical plan;
@@ -131,36 +149,32 @@ Before seeing results, record:
 - reproduction command;
 - invalidation criteria.
 
-Use the Scientific Research OS `form-hypothesis` and `design-experiment` skills when appropriate.
+## 6. Implementation
 
-### 6. Implementation
+Reusable logic belongs in `src/ams_ecal/` with tests in `tests/`.
 
-Reusable scientific logic belongs in `src/ams_ecal/` with tests in `tests/`.
+Notebooks should call tested code and serve as:
 
-Jupyter notebooks should call tested code and serve as:
+- scientific narratives;
+- derivation records;
+- visualization environments;
+- validation records.
 
-- research narratives;
-- sanity-check environments;
-- visualization/analysis records;
-- scientific validation documents.
+## 7. Attack the result
 
-A notebook should not be the only implementation of reusable logic.
+Use independent review when useful:
 
-### 7. Attack the result
+- physics review;
+- statistics review;
+- source verification;
+- reproducibility audit;
+- adversarial review.
 
-Before accepting an important conclusion, use independent review where useful:
+Do not use an independent reviewer merely to obtain agreement.
 
-- `physics-reviewer`;
-- `statistics-reviewer`;
-- `source-verifier`;
-- `reproducibility-auditor`;
-- `adversarial-reviewer`.
+## 8. Close the session
 
-The reviewer should not be the same context that authored the result when independence matters.
-
-### 8. Close the session
-
-Every serious session should end with:
+Record:
 
 ```text
 I learned:
@@ -181,43 +195,31 @@ Next action:
 
 Only human-accepted conclusions update `research/STATE.md`.
 
-## Current project cadence
+---
 
-The current engineering and learning tracks intentionally run in parallel:
-
-```text
-FastMC engineering                 Learning/research preparation
-------------------                 -----------------------------
-Block 6 stochastic events          stochastic processes/statistics
-Block 7 detector response          fractal/multifractal foundations
-Block 8 validated datasets         estimator design / finite-size bias
-                 \                 /
-                  \               /
-                   controlled multifractal experiments
-                                  ↓
-                        classical multiscale ML
-                                  ↓
-                     justified QML/QCNN studies
-```
-
-The broader chaos-theory roadmap remains a parallel learning track and should not be forced into the AMS physics interpretation.
-
-## Research record structure
-
-As concrete records appear, use:
+# Current project cadence
 
 ```text
-research/
-├── STATE.md
-├── CHAOS_FRACTALS_QML.md
-├── questions/
-├── hypotheses/
-├── experiments/
-└── decisions/
+FastMC engineering             Multiscale research preparation
+------------------             -------------------------------
+Block 6 stochastic EM          scaling laws
+Block 6B proton model          fractal dimensions
+Block 7 detector response      generalized dimensions
+Block 8 datasets               finite-resolution bias
+Geant4 reference               estimator validation
+             \                 /
+              \               /
+        RQ-001 preservation study
+                    ↓
+      Paper 1: information + classical ML
+                    ↓
+        Paper 2+: justified QML
 ```
 
-Do not create empty placeholder records.
+The broader chaos-theory roadmap remains a parallel learning track and must not
+be forced into the shower-physics interpretation.
 
 ## Guiding rule
 
-**Understanding lives in Obsidian. Evidence lives in Git. The human researcher decides what becomes knowledge or conclusion.**
+**Understanding lives in Obsidian. Evidence and reproducibility live in Git.
+The human researcher decides what becomes accepted knowledge or conclusion.**
