@@ -37,6 +37,63 @@ Codex is primarily the implementation/reproducibility agent:
 
 Codex may explain scientific reasoning, but should not bypass the learning/research workflow by implementing a method whose assumptions are still unresolved.
 
+## Agent handoff model
+
+Claude and Codex should normally be used **sequentially, not simultaneously**, for substantial research work.
+
+Preferred workflow:
+
+```text
+one agent owns the task
+        ↓
+human reviews the output
+        ↓
+second agent independently verifies/reproduces/reviews when useful
+        ↓
+human decides what is accepted
+```
+
+Do not use the second agent merely to agree with the first.
+
+When cross-validating:
+
+- give the reviewer the artifact, claim, source, test result, or acceptance criteria;
+- withhold the first agent's full reasoning when practical;
+- ask the reviewer to reconstruct the conclusion independently;
+- compare conclusions only after the independent pass is complete.
+
+Git remains the shared coordination layer.
+
+## Independent literature discovery
+
+For hypothesis-sensitive or implementation-defining scientific questions, do not inspect implementation assumptions before the initial literature search unless they are required to define the physical system.
+
+During the independent discovery pass:
+
+- formulate the question neutrally;
+- use detector/project context only to define scope;
+- do not use our preferred equations, implementation names, or desired conclusions as search priors;
+- seek competing models, contradictory evidence, null results, and validity limits;
+- return the external evidence landscape before reconciling it with the repository.
+
+A later reconciliation pass may compare the independent evidence against:
+
+- `src/ams_ecal/`,
+- tests,
+- configuration values,
+- existing project citations,
+- hypotheses and planned models.
+
+Do not silently bend the source interpretation to preserve existing code.
+
+For important implementation-affecting claims, distinguish:
+
+- AMS-specific evidence,
+- externally established result in the relevant regime,
+- transferred approximation,
+- project phenomenological assumption,
+- unresolved question.
+
 ## Scientific change checklist
 
 Before implementing a new scientific method, state:
@@ -46,43 +103,39 @@ Before implementing a new scientific method, state:
 - mathematical definition,
 - units/domain,
 - expected limiting behavior,
-- validation plan.
+- validation plan,
+- source provenance for implementation-affecting assumptions.
 
 For a new research experiment, use the `design-experiment` skill when available.
 
 ## Branch / worktree policy
 
-Never have Claude and Codex perform substantial writes on the same working tree at the same time.
+Do not have Claude and Codex perform substantial writes on the same working tree at the same time.
 
-Preferred structure:
+Because agents are normally used sequentially, separate worktrees are optional rather than mandatory. Use them when:
+
+- preserving an experimental implementation separately is useful;
+- requesting an independent implementation;
+- comparing alternative approaches;
+- substantial unmerged work already exists.
+
+If using separate worktrees, a typical structure is:
 
 ```text
 ams-ecal-qml/          # human integration worktree
-ams-ecal-qml-codex/    # Codex worktree
-ams-ecal-qml-claude/   # Claude worktree
+ams-ecal-qml-codex/    # optional Codex worktree
+ams-ecal-qml-claude/   # optional Claude worktree
 ```
 
-Preferred branches:
+Agents do not merge their own work into the human integration branch.
 
-```text
-research/<topic>        # human/integration branch
-agent/codex-<task>      # Codex
-agent/claude-<task>     # Claude
-```
+Before handoff, report:
 
-Rules:
-
-1. One agent owns one worktree/branch at a time.
-2. Agents do not merge their own branches into the integration branch.
-3. Commit small coherent changes.
-4. Before handoff, report:
-   - commits,
-   - files changed,
-   - tests run,
-   - scientific assumptions introduced,
-   - unresolved issues.
-5. The human reviews diffs and chooses what to merge.
-6. Agent branches may be discarded freely; accepted evidence must remain reproducible on the integration branch.
+- commits/files changed,
+- tests/checks run,
+- scientific assumptions introduced,
+- sources relied on,
+- unresolved issues.
 
 ## Notebook policy
 
@@ -102,6 +155,8 @@ Important physics claims require authoritative sources.
 For AMS detector facts, prefer official AMS/collaboration material and peer-reviewed AMS publications.
 
 Do not substitute generic calorimeter values for AMS-specific values silently.
+
+Follow the independent-discovery rules in `RESEARCH_PROTOCOL.md` before using the repository's current model as a literature-search prior.
 
 ## Secrets
 

@@ -1,4 +1,3 @@
-
 # AMS ECAL QML — Research Protocol
 
 This repository follows the [Scientific Research OS](https://github.com/Chagatai404/scientific-research-os) workflow.
@@ -53,6 +52,49 @@ For physics and mathematical claims:
 7. Videos only as teaching supplements unless independently verified.
 
 Record exact page, section, equation, figure, DOI, or stable URL when practical.
+
+### Independent literature discovery and bias control
+
+For questions that may determine a physics model, stochastic parameterization, estimator, architecture, or scientific conclusion, do not let the current codebase become the default search prior.
+
+Use the following sequence:
+
+```text
+neutral scientific question
+        ↓
+independent external discovery
+        ↓
+independent source verification
+        ↓
+adversarial counterevidence search
+        ↓
+reconciliation with repository assumptions/code
+        ↓
+human decision
+```
+
+During the independent discovery pass:
+
+- use only AMS/project context necessary to define the detector, material, geometry, energy range, particle type, or observable;
+- do not expose implementation details, preferred equations, existing parameterizations, current project citations, or desired conclusions unless they are genuinely required to scope the search;
+- search for competing models, contradictory evidence, null results, and validity limits as well as supportive work;
+- do not use search queries that merely restate the names of our existing implementation choices when those choices are under evaluation.
+
+For important claims, source verification should be independent of the original scout's interpretation when practical. Give the verifier the claim, strongest source(s), and minimum regime context rather than the first agent's reasoning.
+
+Only after independent discovery and verification should the evidence be compared with the current FastMC, multifractal hypothesis, or proposed QML architecture.
+
+A mismatch between external evidence and the codebase is a research finding. Do not reinterpret the source to preserve the implementation.
+
+For implementation-affecting assumptions, label the provenance explicitly as one of:
+
+- AMS-specific evidence,
+- externally established in the relevant regime,
+- transferred approximation from another detector/material/energy regime,
+- project phenomenological assumption,
+- unresolved.
+
+Cross-validation means independent reconstruction, verification, or reproduction. It does not mean asking a second agent whether it agrees with the first.
 
 ## 3. Epistemic labels
 
@@ -202,7 +244,14 @@ Claude and Codex should:
 - report uncertainty and conflicting evidence;
 - avoid reading credentials or unrelated secrets.
 
-For independent review, prefer a separate subagent/context from the authoring agent.
+Claude and Codex are used interchangeably as primary workers rather than as simultaneous co-authors by default. One agent should own a substantial task at a time. The other may later perform an independent verification, implementation review, source check, or reproduction.
+
+For independent review:
+
+- prefer a separate subagent/context from the authoring agent;
+- do not preload the reviewer with the author's full reasoning when independence is important;
+- give the reviewer the artifact, claim, source, experiment, or acceptance criteria needed to reconstruct the issue independently;
+- compare independent conclusions only after both are complete.
 
 ## 12. Research state updates
 
