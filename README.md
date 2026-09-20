@@ -665,6 +665,13 @@ controlled datasets.
 - **Block 6 — Stochastic event generation:** introduce physically meaningful
   event-to-event fluctuations with reproducible random-number control,
   including explicitly documented approximations for proton-event diversity.
+  Split into **6A** (electromagnetic) and **6B** (proton phenomenology) so the
+  electromagnetic path is validated before hadronic diversity is attempted.
+  The 6A physical model is accepted and documented in `research/STATE.md`: a
+  single fluctuating shower-maximum depth `T0` at fixed `b = 0.65`, sampled
+  lognormally, with the deterministic lateral profile applied per stochastic
+  layer energy. Origin is referenced to detector entry. **Physical model
+  accepted; implementation not yet started.**
 - **Block 7 — Detector response and digitization:** introduce visible-energy
   response, sampling fluctuations, noise, thresholds, saturation, calibration,
   and other detector complications only when justified.
@@ -1068,7 +1075,7 @@ Those remaining responsibilities begin with Block 6.
 | Event provenance and schema versioning | Complete |
 | Longitudinal electromagnetic shower profile | Complete: Block 4 |
 | Lateral electromagnetic shower profile | Complete: Block 5 |
-| Stochastic FastMC generation | Planned: Block 6 |
+| Stochastic FastMC generation | Physical model accepted; implementation pending: Block 6A |
 | Detector response and digitization | Planned: Block 7 |
 | FastMC dataset generation and validation | Planned: Block 8 |
 | Geant4 reference simulation | Planned: Blocks 9–14 |

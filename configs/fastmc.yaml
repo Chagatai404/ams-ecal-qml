@@ -1,9 +1,29 @@
 schema_version: 2
 
 longitudinal_em:
-  # AMS finds a constant beta = 0.65 for its detector-specific
+  # AMS reports a constant scale parameter b = 0.65 for its detector-specific
   # longitudinal gamma parametrization. Depth is measured in X_0.
-  # For reference: https://ams02.space/advances-data-analysis/new-reconstruction-method-electromagnetic-calorimeter-ecal-analysis
+  #
+  # Peer-reviewed source:
+  #   M. Aguilar et al. (AMS Collaboration), Physics Reports 894 (2021) 1-116,
+  #   section 1.7.1 "ECAL shower reconstruction": "In the AMS ECAL, we found
+  #   that the scale parameter b is constant (b = 0.65)."
+  #   The functional form is cited there to the PDG.
+  #
+  # Primary reconstruction method (exact locator not yet extracted):
+  #   A. Kounine, Z. Weng, W. Xu, C. Zhang,
+  #   Nucl. Instrum. Methods A 869 (2017) 110-117.
+  #   DOI 10.1016/j.nima.2017.07.013
+  #
+  # Informal summary, retained only as a pointer:
+  #   https://ams02.space/advances-data-analysis/new-reconstruction-method-electromagnetic-calorimeter-ecal-analysis
+  #
+  # SCOPE NOTE (open question, not a defect): AMS obtains the individual shower
+  # parameters E0 and T0 from a fit to *observed* energy depositions in the ECAL
+  # cells. b therefore characterizes measured shower shape in this calorimeter
+  # rather than true energy deposition in the lead/fiber composite. How much
+  # detector behaviour is already absorbed here - and what a later Block 7
+  # response model would double-count - is unquantified.
   gamma_rate: 0.65
 
   # PDG (Particle Data Group) mean shower-maximum correction for electron-induced cascades:
